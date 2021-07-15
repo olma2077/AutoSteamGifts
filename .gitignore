@@ -1,0 +1,6 @@
+env/
+*.ini
+__pycache__/
+.vscode/
+.env
+users.json
