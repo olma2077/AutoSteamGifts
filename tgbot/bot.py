@@ -29,7 +29,7 @@ dp = Dispatcher(bot, storage=storage)
 async def main():
     await set_commands(bot)
     try:
-        await asyncio.gather(dp.start_polling(), sg.start_gw_entering())
+        await asyncio.gather(dp.start_polling(), sg.start_gw_entering(storage))
     finally:
         await bot.session.close()
         await shutdown(dp)

@@ -4,9 +4,9 @@ from tenacity import retry, stop_after_attempt, wait_fixed, wait_random
 from bs4 import BeautifulSoup
 import json
 import logging
-from typing import List, Tuple
 
-import bot
+from typing import List, Tuple
+from aiogram.contrib.fsm_storage.files import JSONStorage
 
 
 SG_URL = 'https://www.steamgifts.com/'
@@ -134,12 +134,12 @@ class SGUser:
             await self.enter_sg_section(section)
 
 
-async def start_gw_entering() -> None:
+async def start_gw_entering(storage: JSONStorage) -> None:
     global _session
     _session = aiohttp.ClientSession()
 
     while True:
-        for user in bot.storage.data.items():
+        for user in storage.data.items():
             id = user[0]
             token = user[1][user[0]]['data']['token']
             sections = user[1][user[0]]['data']['sections']
