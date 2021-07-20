@@ -1,6 +1,6 @@
 import asyncio
 import aiohttp
-from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import retry, stop_after_attempt, wait_fixed, wait_random
 from bs4 import BeautifulSoup
 import json
 import logging
@@ -26,7 +26,7 @@ MIN_POINTS_TO_ENTER = 10
 _session = None
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
+@retry(stop=stop_after_attempt(10), wait=wait_fixed(3) + wait_random(0, 2))
 async def verify_token(token: str) -> bool:
     cookies = {'PHPSESSID': token}
     async with _session.get(VERIFY_URL, cookies=cookies) as resp:
@@ -41,14 +41,13 @@ class SGUser:
         }
         self.sections = sections
 
-    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
+    @retry(stop=stop_after_attempt(10), wait=wait_fixed(3) + wait_random(0, 2))
     async def get_soup_from_page(self, url: str) -> BeautifulSoup:
         async with _session.get(url, cookies=self.cookies) as response:
             soup = BeautifulSoup(await response.text(), 'html.parser')
         return soup
 
     async def get_points(self) -> None:
-        # TODO
         soup = await self.get_soup_from_page(SG_URL)
         self.xsrf_token = soup.find('input', {'name': 'xsrf_token'})['value']
         self.points = int(soup.find('span', class_='nav__points').text)
@@ -64,15 +63,15 @@ class SGUser:
         return games_list
 
     def get_game_details(self, soup: BeautifulSoup) -> Tuple[str, int]:
-        # TODO
-        game_cost = soup.find_all('span', class_='giveaway__heading__thin')[-1]
-        game_cost = int(game_cost.getText().replace('(', '').replace(')', '').replace('P', ''))
+        game_cost = int(
+            soup.find_all('span', class_='giveaway__heading__thin')[-1]
+            .text.strip('(P)'))
         game_name = soup.find('a', class_='giveaway__heading__name').text
+        logging.debug(f"{game_name}: {game_cost}")
 
         return game_name, game_cost
 
     async def enter_giveaway(self, soup: BeautifulSoup) -> bool:
-        # TODO
         game_id = soup.find('a', class_='giveaway__heading__name')['href'].split('/')[2]
         payload = {
             'xsrf_token': self.xsrf_token,
@@ -86,7 +85,7 @@ class SGUser:
         if json_data['type'] == 'success':
             return True
         else:
-            logging.info(f"{self.id}: Entry error: {json_data['msg']}")
+            logging.debug(f"{self.id}: Entry error: {json_data['msg']}")
             return False
 
     async def enter_sg_section(self, section: str) -> None:
@@ -115,17 +114,19 @@ class SGUser:
                         continue
 
                     if not await self.enter_giveaway(game):
-                        logging.info(f"{self.id}: Could not enter {game_name}")
+                        pass
+                        logging.debug(f"{self.id}: Could not enter {game_name}")
                     else:
                         logging.info(f"{self.id}: Entered {game_name}")
                         self.points -= game_cost
-                    await asyncio.sleep(3)
+                    await asyncio.sleep(2)
 
                     if self.points < MIN_POINTS_TO_ENTER:
                         logging.info(f"{self.id}: Out of points!")
                         return
 
                 page += 1
+                await asyncio.sleep(5)
 
     async def enter_giveaways(self) -> None:
         for section in self.sections:
