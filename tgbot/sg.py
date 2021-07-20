@@ -21,7 +21,7 @@ SECTION_URLS = {
     'All': "search?page=%d"
 }
 
-SG_CYCLE = 600
+SG_CYCLE = 1800
 MIN_POINTS_TO_ENTER = 10
 _session = None
 
