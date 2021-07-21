@@ -141,10 +141,11 @@ async def start_gw_entering(storage: JSONStorage) -> None:
     while True:
         for user in storage.data.items():
             id = user[0]
-            token = user[1][user[0]]['data']['token']
-            sections = user[1][user[0]]['data']['sections']
-            if await verify_token(token):
-                sg_user = SGUser(id, token, sections)
-                logging.info(f"{id}: Polling user with {sections}")
-                await sg_user.enter_giveaways()
+            if 'token' in user[1][user[0]]['data']:
+                token = user[1][user[0]]['data']['token']
+                sections = user[1][user[0]]['data']['sections']
+                if await verify_token(token):
+                    sg_user = SGUser(id, token, sections)
+                    logging.info(f"{id}: Polling user with {sections}")
+                    await sg_user.enter_giveaways()
         await asyncio.sleep(SG_CYCLE)
