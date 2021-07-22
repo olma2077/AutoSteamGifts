@@ -80,13 +80,18 @@ class SGUser:
         }
 
         entry = await _session.post(SG_URL + 'ajax.php', data=payload)
-        json_data = json.loads(await entry.text())
 
-        if json_data['type'] == 'success':
-            return True
-        else:
-            logging.debug(f"{self.id}: Entry error: {json_data['msg']}")
-            return False
+        try:
+            json_data = json.loads(await entry.text())
+            if json_data['type'] == 'success':
+                return True
+            else:
+                logging.debug(f"{self.id}: Entry error: {json_data['msg']}")
+                return False
+        except:
+            logging.error(f"Could not parse json:\n {entry.text()}")
+            raise
+
 
     async def enter_sg_section(self, section: str) -> None:
         await self.get_points()
