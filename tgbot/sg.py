@@ -4,6 +4,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed, wait_random
 from bs4 import BeautifulSoup
 import json
 import logging
+import time
 
 from typing import List, Tuple
 from aiogram.contrib.fsm_storage.files import JSONStorage
@@ -21,7 +22,7 @@ SECTION_URLS = {
     'All': "search?page=%d"
 }
 
-SG_CYCLE = 1800
+SG_CYCLE = 900
 MIN_POINTS_TO_ENTER = 10
 _session = None
 
@@ -79,18 +80,17 @@ class SGUser:
             'code': game_id
         }
 
-        entry = await _session.post(SG_URL + 'ajax.php', data=payload)
-
-        try:
-            json_data = json.loads(await entry.text())
-            if json_data['type'] == 'success':
-                return True
-            else:
-                logging.debug(f"{self.id}: Entry error: {json_data['msg']}")
-                return False
-        except:
-            logging.error(f"Could not parse json:\n {entry.text()}")
-            raise
+        async with _session.post(SG_URL + 'ajax.php', data=payload) as entry:
+            try:
+                json_data = json.loads(await entry.text())
+                if json_data['type'] == 'success':
+                    return True
+                else:
+                    logging.debug(f"{self.id}: Entry error: {json_data['msg']}")
+                    return False
+            except:
+                logging.error(f"Could not parse json:\n {entry.text()}")
+                raise
 
 
     async def enter_sg_section(self, section: str) -> None:
@@ -132,6 +132,8 @@ class SGUser:
 
                 page += 1
                 await asyncio.sleep(5)
+        else:
+            logging.info(f"{self.id}: Out of points!")
 
     async def enter_giveaways(self) -> None:
         for section in self.sections:
@@ -153,4 +155,6 @@ async def start_gw_entering(storage: JSONStorage) -> None:
                     sg_user = SGUser(id, token, sections)
                     logging.info(f"{id}: Polling user with {sections}")
                     await sg_user.enter_giveaways()
+            await asyncio.sleep(1)
+        logging.debug(f"Cycle finished, sleeping for {SG_CYCLE//60} min")
         await asyncio.sleep(SG_CYCLE)

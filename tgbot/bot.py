@@ -19,7 +19,8 @@ import sg
 load_dotenv()
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(format="[%(asctime)s] %(levelname)s : %(name)s : %(message)s",
+                    level=logging.INFO, datefmt="%Y-%m-%d at %H:%M:%S")
 
 bot = Bot(token=TOKEN)
 storage = JSONStorage('users.json')
