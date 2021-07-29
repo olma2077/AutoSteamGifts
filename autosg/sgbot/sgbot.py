@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from aiogram.contrib.fsm_storage.files import JSONStorage
 
 
-SG_CYCLE = 300
+SG_CYCLE = 1800
 MIN_POINTS_TO_ENTER = 10
 
 
@@ -32,11 +32,11 @@ class SGUser:
     async def enter_giveaways(self):
         '''Enter giveaways for a user'''
         for section in self.sections:
-            logging.info(f"{self.tg_id}: Polling section {section}")
+            logging.info(f"{self.tg_id}: polling section {section}")
 
             points = await self.sg_session.get_points()
             if points > MIN_POINTS_TO_ENTER:
-                logging.info(f"{self.tg_id}: Starting with {points} points")
+                logging.info(f"{self.tg_id}: starting with {points} points")
                 giveaways = await self.sg_session.get_giveaways_from_section(section)
 
                 if len(giveaways):
@@ -46,16 +46,16 @@ class SGUser:
                             continue
 
                         if not await self.sg_session.enter_giveaway(giveaway):
-                            logging.debug(f"{self.tg_id}: Could not enter {giveaway.name}")
+                            logging.debug(f"{self.tg_id}: could not enter {giveaway.name}")
                         else:
-                            logging.info(f"{self.tg_id}: Entered {giveaway.name}")
+                            logging.info(f"{self.tg_id}: entered {giveaway.name}")
                             points -= giveaway.cost
 
                         if points < MIN_POINTS_TO_ENTER:
-                            logging.info(f"{self.tg_id}: Out of points!")
+                            logging.info(f"{self.tg_id}: out of points!")
                             return
             else:
-                logging.info(f"{self.tg_id}: Out of points!")
+                logging.info(f"{self.tg_id}: out of points!")
 
 
 def _parse_user(user: Dict) -> Optional[Dict]:
@@ -91,6 +91,7 @@ async def _cleanup_users(storage_users: Dict, users: Dict) -> Dict:
             new_users[user] = users[user]
         else:
             await users[user].sg_session._session.close()
+            logging.info(f"{user}: sg token became invalid, removing user from poll")
 
     return new_users
 
@@ -113,6 +114,7 @@ def _add_users(storage_users: Dict, users: Dict) -> Dict:
             users[user_id] = SGUser(user['tg_id'],
                                     user['token'],
                                     user['sections'])
+            logging.info(f"{user_id}: added user to poll")
 
     return users
 
@@ -135,7 +137,7 @@ async def start_gw_entering(storage: JSONStorage):
         users = await _sync_users(storage, users)
 
         for user in users:
-            logging.info(f"{user}: Polling user with {users[user].sections}")
+            logging.info(f"{user}: polling user with sections: {users[user].sections}")
             await users[user].enter_giveaways()
 
         await asyncio.sleep(SG_CYCLE)

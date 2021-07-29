@@ -151,8 +151,8 @@ class SteamGiftsSession:
                 if json_data['type'] == 'success':
                     return True
                 else:
-                    logging.debug(f"{self.tg_id}: Entry error: {json_data['msg']}")
+                    logging.debug(f"{self.tg_id}: entry error: {json_data['msg']}")
                     return False
             except Exception:
-                logging.error(f"Could not parse json:\n {entry.text()}")
+                logging.error(f"{self.tg_id}: could not parse json:\n {entry.text()}")
                 raise

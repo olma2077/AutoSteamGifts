@@ -1,5 +1,6 @@
 '''Process messages from a user'''
 from __future__ import annotations
+import logging
 
 import autosg.sgbot as sgbot
 from .markups import sections_kb
@@ -63,6 +64,7 @@ async def handle_unregister(message: Message, state: FSMContext):
         await message.answer(
             'Your settings and PHPSESSID were removed.\n'
             'Bot will stop entering giveaways for you. /register to start the bot again.')
+        logging.info(f"{message.from_user.id}: user unregistered!")
     else:
         await message.answer('You should /register first.')
 
@@ -80,6 +82,7 @@ async def handle_token(message: Message, state: FSMContext):
         await message.answer(
             'Your PHPSESSID was successfully registered.\n'
             'Bot will start entering giveaways for you. /configure to change default settings.')
+        logging.info(f"{message.from_user.id}: new user registered!")
     else:
         await message.answer(
             'Provided PHPSESSID is invalid.\n'
