@@ -1,8 +1,8 @@
 import asyncio
 import logging
 
-import autosg.tgbot.tgbot as tgbot
-import autosg.sgbot.sgbot as sgbot
+import autosg.tgbot as tgbot
+import autosg.sgbot as sgbot
 
 
 async def main():

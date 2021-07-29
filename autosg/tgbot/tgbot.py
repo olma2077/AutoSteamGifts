@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.files import JSONStorage
 
-import autosg.tgbot.handlers as handlers
+from . import handlers
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:

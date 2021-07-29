@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import autosg.sgbot.sg as sg
+import autosg.sgbot as sgbot
 from .markups import sections_kb
 
 from typing import TYPE_CHECKING
@@ -71,10 +71,10 @@ async def handle_token(message: types.Message, state: FSMContext):
         await message.answer(
             "You've already registered your token.\n"
             "To update PHPSESSID, /unregister first.")
-    elif await sg.verify_token(message.text):
+    elif await sgbot.verify_token(message.text):
         await state.update_data(
             token=message.text,
-            sections=list(sg.SECTION_URLS)[0:1])
+            sections=list(sgbot.SECTION_URLS)[0:1])
         await message.answer(
             'Your PHPSESSID was successfully registered.\n'
             'Bot will start entering giveaways for you. /configure to change default settings.')
