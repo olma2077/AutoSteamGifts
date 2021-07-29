@@ -56,6 +56,7 @@ class SGUser:
                             return
             else:
                 logging.info(f"{self.tg_id}: out of points!")
+            logging.info(f"{self.tg_id}: end of section")
 
 
 def _parse_user(user: Dict) -> Optional[Dict]:

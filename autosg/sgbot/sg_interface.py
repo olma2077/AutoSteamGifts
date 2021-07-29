@@ -125,7 +125,7 @@ class SteamGiftsSession:
             filter_url = f"{SG_URL}/giveaways/{page_url}"
 
             soup = await self._get_soup_from_page(filter_url)
-            logging.info(f"{self.tg_id}: checking page {page} of {section} section")
+            logging.info(f"{self.tg_id}: parsing page {page} of {section} section")
 
             if soup.find(class_='pagination--no-results'):
                 logging.info(f"{self.tg_id}: page {page} of {section} section is empty, finishing")
