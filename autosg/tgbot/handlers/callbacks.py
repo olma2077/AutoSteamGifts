@@ -7,18 +7,19 @@ from .markups import sections_kb
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from aiogram import Dispatcher, types
+    from aiogram import Dispatcher
+    from aiogram.types import CallbackQuery
     from aiogram.dispatcher import FSMContext
 
 
-def register_callbacks(dp: Dispatcher):
+def register_callbacks(dispatcher: Dispatcher):
     '''Register callback handlers in dispatcher'''
-    dp.register_callback_query_handler(
+    dispatcher.register_callback_query_handler(
         update_sections_info,
         lambda c: c.data[:3] in ['del', 'add'])
 
 
-async def update_sections_info(callback_query: types.CallbackQuery, state: FSMContext):
+async def update_sections_info(callback_query: CallbackQuery, state: FSMContext):
     '''Handle section state update button'''
     section = callback_query.data.split("_")[-1]
     sections = (await state.get_data())['sections']

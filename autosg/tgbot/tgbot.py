@@ -2,7 +2,8 @@ from __future__ import annotations
 import os
 from dotenv import load_dotenv
 
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
+from aiogram.types import BotCommand
 from aiogram.contrib.fsm_storage.files import JSONStorage
 
 from . import handlers
@@ -35,10 +36,10 @@ async def on_startup(dispatcher: Dispatcher):
 async def set_commands(bot: Bot):
     '''Set available bot commands on Telegram server'''
     commands = [
-        types.BotCommand(command="/start", description="Start the bot"),
-        types.BotCommand(command="/register", description="Register SG account in the bot"),
-        types.BotCommand(command="/configure", description="Configure ASG bot parameters"),
-        types.BotCommand(command="/unregister", description="Remove SG account from the bot")]
+        BotCommand(command="/start", description="Start the bot"),
+        BotCommand(command="/register", description="Register SG account in the bot"),
+        BotCommand(command="/configure", description="Configure ASG bot parameters"),
+        BotCommand(command="/unregister", description="Remove SG account from the bot")]
 
     await bot.set_my_commands(commands)
 

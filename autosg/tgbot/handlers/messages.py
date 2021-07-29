@@ -5,7 +5,8 @@ from .markups import sections_kb
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from aiogram import Dispatcher, types
+    from aiogram import Dispatcher
+    from aiogram.types import Message
     from aiogram.dispatcher import FSMContext
 
 
@@ -18,7 +19,7 @@ def register_commands(dp: Dispatcher):
     dp.register_message_handler(handle_token)
 
 
-async def handle_start(message: types.Message, state: FSMContext):
+async def handle_start(message: Message, state: FSMContext):
     '''Handle /start command from a user'''
     if 'token' in await state.get_data():
         await message.answer(
@@ -31,7 +32,7 @@ async def handle_start(message: types.Message, state: FSMContext):
             'Start with /register to give bot access to your account.')
 
 
-async def handle_register(message: types.Message, state: FSMContext):
+async def handle_register(message: Message, state: FSMContext):
     '''Handle /register command from a user'''
     if 'token' in await state.get_data():
         await message.answer(
@@ -44,7 +45,7 @@ async def handle_register(message: types.Message, state: FSMContext):
             'Please, provide its content below.')
 
 
-async def handle_configure(message: types.Message, state: FSMContext):
+async def handle_configure(message: Message, state: FSMContext):
     '''Handle /configure command from a user'''
     if 'token' in await state.get_data():
         await message.answer(
@@ -54,7 +55,7 @@ async def handle_configure(message: types.Message, state: FSMContext):
         await message.answer('You should /register first.')
 
 
-async def handle_unregister(message: types.Message, state: FSMContext):
+async def handle_unregister(message: Message, state: FSMContext):
     '''Handle /unregister command from a user'''
     if 'token' in await state.get_data():
         await state.finish()
@@ -65,7 +66,7 @@ async def handle_unregister(message: types.Message, state: FSMContext):
         await message.answer('You should /register first.')
 
 
-async def handle_token(message: types.Message, state: FSMContext):
+async def handle_token(message: Message, state: FSMContext):
     '''Handle any text message from a user as a SteamGifts token'''
     if 'token' in await state.get_data():
         await message.answer(
