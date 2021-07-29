@@ -1,3 +1,4 @@
+'''Implements interface to SteamGifts site for entering giveaways'''
 from __future__ import annotations
 import asyncio
 import json
@@ -76,6 +77,7 @@ def _get_giveaways_from_soup_page(soup: BeautifulSoup) -> List[Giveaway]:
 
 
 class Giveaway:
+    '''Giveaway parameters object'''
     def __init__(self, code: str, name: str, cost: int):
         self.code = code
         self.name = name
@@ -83,7 +85,7 @@ class Giveaway:
 
 
 class SteamGiftsSession:
-    '''SteamGifts API to get info for a user identified by a token'''
+    '''SteamGifts interface to get info for a user identified by a token'''
     def __init__(self, tg_id: str, token: str):
         '''Set necessary session properties'''
         self.tg_id = tg_id
@@ -98,12 +100,16 @@ class SteamGiftsSession:
         return soup
 
     async def _update_session(self):
-        '''Get current user's points on SteamGifts'''
+        '''Get current user's parameters on SteamGifts
+        
+        Gets points and xsrf_token for interaction.
+        '''
         soup = await self._get_soup_from_page(SG_URL)
         self._xsrf_token = soup.find('input', {'name': 'xsrf_token'})['value']
         self._points = int(soup.find('span', class_='nav__points').text)
 
     async def get_points(self) -> int:
+        '''Method to get current user's points value'''
         await self._update_session()
         return self._points
 

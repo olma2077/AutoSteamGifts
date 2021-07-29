@@ -1,20 +1,29 @@
+'''Implements logic of entering giveaways for a user from Telegram.
+
+Uses user data from tgbot module, interaction with steamgits site is
+isolated in sg_interface.
+
+'''
 from __future__ import annotations
 import asyncio
 import logging
 
-from . import sg
+from . import sg_interface as sg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import List, Optional, Dict
     from aiogram.contrib.fsm_storage.files import JSONStorage
 
+
 SG_CYCLE = 300
 MIN_POINTS_TO_ENTER = 10
 
 
 class SGUser:
+    '''Handles user-related operations with steamgift giveaways'''
     def __init__(self, tg_id: str, token: str, sections: List):
+        '''Set necessary properties, start steamgifts session'''
         self.tg_id = tg_id
         self.token = token
         self.sections = sections

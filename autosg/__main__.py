@@ -1,3 +1,9 @@
+'''Automates entering SteamGifts giveaways for a user.
+
+User interacts with application using Telegram bot interface.
+It is possible to select which SteamGifts sections to check for
+available giveaways.
+'''
 import asyncio
 import logging
 
@@ -6,6 +12,9 @@ import autosg.sgbot as sgbot
 
 
 async def main():
+    '''Kicks off coroutines for interactions with Telegram bot server and
+    SteamGifts site.
+    '''
     logging.basicConfig(
         format="[%(asctime)s] %(levelname)s : %(name)s : %(message)s",
         level=logging.INFO,

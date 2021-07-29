@@ -1,4 +1,4 @@
-from .sg import verify_token, SECTION_URLS
+from .sg_interface import verify_token, SECTION_URLS
 from .sgbot import start_gw_entering
 
 

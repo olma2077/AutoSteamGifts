@@ -1,3 +1,4 @@
+'''Process callbacks from users' interactions with keyboards'''
 from __future__ import annotations
 from contextlib import suppress
 

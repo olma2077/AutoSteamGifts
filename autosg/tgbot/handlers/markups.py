@@ -1,3 +1,4 @@
+'''Defines keyboards' markups'''
 from __future__ import annotations
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton

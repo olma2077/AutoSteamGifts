@@ -1,3 +1,4 @@
+'''Process messages from a user'''
 from __future__ import annotations
 
 import autosg.sgbot as sgbot

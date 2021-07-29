@@ -1,3 +1,4 @@
+'''Implements interaction with Telegram bot server'''
 from __future__ import annotations
 import os
 from dotenv import load_dotenv
