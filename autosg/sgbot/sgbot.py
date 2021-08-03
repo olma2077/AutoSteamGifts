@@ -50,6 +50,7 @@ class SGUser:
                         else:
                             logging.info(f"{self.tg_id}: entered {giveaway.name}")
                             points -= giveaway.cost
+                            await asyncio.sleep(2)
 
                         if points < MIN_POINTS_TO_ENTER:
                             logging.info(f"{self.tg_id}: out of points!")
