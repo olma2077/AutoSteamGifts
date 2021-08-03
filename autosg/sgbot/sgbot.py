@@ -50,6 +50,7 @@ class SGUser:
                         else:
                             logging.info(f"{self.tg_id}: entered {giveaway.name}")
                             points -= giveaway.cost
+                            await asyncio.sleep(2)
 
                         if points < MIN_POINTS_TO_ENTER:
                             logging.info(f"{self.tg_id}: out of points!")
@@ -77,7 +78,8 @@ async def _get_users_from_storage(storage: JSONStorage) -> Dict:
     '''Parse users from Telegram storage'''
     users = {}
     for user_entry in storage.data.items():
-        if user := _parse_user(user_entry):
+        user = _parse_user(user_entry)
+        if user:
             if await sg.verify_token(user['token']):
                 users[user['tg_id']] = user
 
