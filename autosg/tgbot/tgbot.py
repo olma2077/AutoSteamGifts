@@ -18,9 +18,9 @@ def init_tg() -> Tuple[Bot, JSONStorage, Dispatcher]:
     '''Initialize Telegram bot objects'''
     # import token from .env file
     load_dotenv()
-    TOKEN = os.getenv('TELEGRAM_TOKEN')
+    token = os.getenv('TELEGRAM_TOKEN')
 
-    bot = Bot(token=TOKEN)
+    bot = Bot(token=token)
     storage = JSONStorage('users.json')
     dispatcher = Dispatcher(bot, storage=storage)
 

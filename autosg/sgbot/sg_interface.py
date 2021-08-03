@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from dataclasses import dataclass
 
 import aiohttp
 from tenacity import retry, stop_after_attempt, wait_fixed, wait_random
@@ -76,6 +77,7 @@ def _get_giveaways_from_soup_page(soup: BeautifulSoup) -> List[Giveaway]:
     return giveaways
 
 
+@dataclass
 class Giveaway:
     '''Giveaway parameters object'''
     def __init__(self, code: str, name: str, cost: int):
@@ -90,18 +92,20 @@ class SteamGiftsSession:
         '''Set necessary session properties'''
         self.tg_id = tg_id
         self._cookies = {'PHPSESSID': token}
-        self._session = aiohttp.ClientSession()
+        self.session = aiohttp.ClientSession()
+        self._xsrf_token = None
+        self._points = None
 
     @retry(stop=stop_after_attempt(10), wait=wait_fixed(3) + wait_random(0, 2))
     async def _get_soup_from_page(self, url: str) -> BeautifulSoup:
         '''Fetch BS object from an URL'''
-        async with self._session.get(url, cookies=self._cookies) as response:
+        async with self.session.get(url, cookies=self._cookies) as response:
             soup = BeautifulSoup(await response.text(), 'html.parser')
         return soup
 
     async def _update_session(self):
         '''Get current user's parameters on SteamGifts
-        
+
         Gets points and xsrf_token for interaction.
         '''
         soup = await self._get_soup_from_page(SG_URL)
@@ -145,14 +149,14 @@ class SteamGiftsSession:
             'do': 'entry_insert',
             'code': giveaway.code}
 
-        async with self._session.post(SG_URL + 'ajax.php', data=payload) as entry:
+        async with self.session.post(SG_URL + 'ajax.php', data=payload) as entry:
             try:
                 json_data = json.loads(await entry.text())
                 if json_data['type'] == 'success':
                     return True
-                else:
-                    logging.debug(f"{self.tg_id}: entry error: {json_data['msg']}")
-                    return False
+
+                logging.debug(f"{self.tg_id}: entry error: {json_data['msg']}")
+                return False
             except Exception:
                 logging.error(f"{self.tg_id}: could not parse json:\n {entry.text()}")
                 raise

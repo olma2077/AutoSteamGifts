@@ -64,11 +64,11 @@ def _parse_user(user: Dict) -> Optional[Dict]:
     if 'token' not in user[1][user[0]]['data']:
         return None
 
-    id = user[0]
+    idx = user[0]
     token = user[1][user[0]]['data']['token']
     sections = user[1][user[0]]['data']['sections']
 
-    return {'tg_id': id,
+    return {'tg_id': idx,
             'token': token,
             'sections': sections}
 
@@ -91,7 +91,7 @@ async def _cleanup_users(storage_users: Dict, users: Dict) -> Dict:
         if user in storage_users:
             new_users[user] = users[user]
         else:
-            await users[user].sg_session._session.close()
+            await users[user].sg_session.session.close()
             logging.info(f"{user}: sg token became invalid, removing user from poll")
 
     return new_users

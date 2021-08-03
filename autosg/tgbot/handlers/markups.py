@@ -13,17 +13,17 @@ if TYPE_CHECKING:
 
 async def sections_kb(state: FSMContext):
     '''Create KB with sections and current selection state'''
-    kb = InlineKeyboardMarkup()
+    keyboard = InlineKeyboardMarkup()
     selected_sections = (await state.get_data())['sections']
 
     for section in list(sgbot.SECTION_URLS):
         if section in selected_sections:
-            kb.add(InlineKeyboardButton(
+            keyboard.add(InlineKeyboardButton(
                 f"{emojize(':check_mark_button:')} {section}",
                 callback_data=f'del_section_{section}'))
         else:
-            kb.add(InlineKeyboardButton(
+            keyboard.add(InlineKeyboardButton(
                 section,
                 callback_data=f'add_section_{section}'))
 
-    return kb
+    return keyboard

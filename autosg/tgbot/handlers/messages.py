@@ -12,13 +12,13 @@ if TYPE_CHECKING:
     from aiogram.dispatcher import FSMContext
 
 
-def register_commands(dp: Dispatcher):
+def register_commands(dispatcher: Dispatcher):
     '''Register message handlers in dispatcher'''
-    dp.register_message_handler(handle_start, commands=['start'])
-    dp.register_message_handler(handle_register, commands=['register'])
-    dp.register_message_handler(handle_configure, commands=['configure'])
-    dp.register_message_handler(handle_unregister, commands=['unregister'])
-    dp.register_message_handler(handle_token)
+    dispatcher.register_message_handler(handle_start, commands=['start'])
+    dispatcher.register_message_handler(handle_register, commands=['register'])
+    dispatcher.register_message_handler(handle_configure, commands=['configure'])
+    dispatcher.register_message_handler(handle_unregister, commands=['unregister'])
+    dispatcher.register_message_handler(handle_token)
 
 
 async def handle_start(message: Message, state: FSMContext):
