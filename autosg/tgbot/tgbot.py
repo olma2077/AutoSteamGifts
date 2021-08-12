@@ -7,6 +7,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand
 from aiogram.contrib.fsm_storage.files import JSONStorage
 
+import autosg.config as config 
 from . import handlers
 
 from typing import TYPE_CHECKING
@@ -20,11 +21,11 @@ def init_tg() -> Tuple[Bot, JSONStorage, Dispatcher]:
     load_dotenv()
     token = os.getenv('TELEGRAM_TOKEN')
 
-    bot = Bot(token=token)
+    config.bot = Bot(token=token)
     storage = JSONStorage('users.json')
-    dispatcher = Dispatcher(bot, storage=storage)
+    dispatcher = Dispatcher(config.bot, storage=storage)
 
-    return bot, storage, dispatcher
+    return storage, dispatcher
 
 
 async def on_startup(dispatcher: Dispatcher):
