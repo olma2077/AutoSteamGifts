@@ -1,6 +1,9 @@
 '''Notify users on events'''
-import autosg.config as config 
+from autosg import config
 
 
-async def notify_user(user_id: str, message: str):
-    await config.bot.send_message(user_id, message)
+async def notify_on_enter(user_id: str, game: str):
+    '''Notify user when entered a giveaway'''
+    await config.bot.send_message(
+        user_id,
+        f'Just entered giveaway of {game}')

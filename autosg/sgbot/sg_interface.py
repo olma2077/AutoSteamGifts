@@ -155,9 +155,7 @@ class SteamGiftsSession:
             try:
                 json_data = json.loads(await entry.text())
                 if json_data['type'] == 'success':
-                    await tgbot.notify_user(
-                        self.tg_id,
-                        f'Just entered giveaway of {giveaway.name}\n')
+                    await tgbot.notify_on_enter(self.tg_id, giveaway.name)
                     return True
 
                 logging.debug(f"{self.tg_id}: entry error: {json_data['msg']}")
