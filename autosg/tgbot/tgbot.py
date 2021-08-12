@@ -38,6 +38,7 @@ async def set_commands(bot: Bot):
     '''Set available bot commands on Telegram server'''
     commands = [
         BotCommand(command="/start", description="Start the bot"),
+        BotCommand(command="/status", description="Check current status of the bot"),
         BotCommand(command="/register", description="Register SG account in the bot"),
         BotCommand(command="/configure", description="Configure ASG bot parameters"),
         BotCommand(command="/unregister", description="Remove SG account from the bot")]
