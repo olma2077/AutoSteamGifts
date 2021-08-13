@@ -4,7 +4,7 @@ from __future__ import annotations
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 
-import autosg.sgbot as sgbot
+from autosg import sgbot
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:

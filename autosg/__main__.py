@@ -7,9 +7,7 @@ available giveaways.
 import asyncio
 import logging
 
-import autosg.tgbot as tgbot
-import autosg.sgbot as sgbot
-import autosg.config as config
+from autosg import tgbot, sgbot, config
 
 
 async def main():

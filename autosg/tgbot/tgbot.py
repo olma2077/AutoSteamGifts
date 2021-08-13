@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand
 from aiogram.contrib.fsm_storage.files import JSONStorage
 
-import autosg.config as config
+from autosg import config
 from . import handlers
 
 from typing import TYPE_CHECKING

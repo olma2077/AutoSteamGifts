@@ -2,7 +2,7 @@
 from __future__ import annotations
 import logging
 
-import autosg.sgbot as sgbot
+from autosg import sgbot
 from .markups import sections_kb
 
 from typing import TYPE_CHECKING
