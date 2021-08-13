@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 def register_commands(dispatcher: Dispatcher):
     '''Register message handlers in dispatcher'''
     dispatcher.register_message_handler(handle_start, commands=['start'])
+    dispatcher.register_message_handler(handle_status, commands=['status'])
     dispatcher.register_message_handler(handle_register, commands=['register'])
     dispatcher.register_message_handler(handle_configure, commands=['configure'])
     dispatcher.register_message_handler(handle_unregister, commands=['unregister'])
@@ -31,7 +32,17 @@ async def handle_start(message: Message, state: FSMContext):
         await message.answer(
             'Hi there!\n'
             'This bot will help you not to miss SteamGifts giveaways! '
-            'Start with /register to give bot access to your account.')
+            'Start with /register to give bot access to your SG account.')
+
+
+async def handle_status(message: Message, state: FSMContext):
+    '''Handle /status command from a user'''
+    if 'token' in await state.get_data():
+        await message.answer(await sgbot.user_status(message.from_user.id))
+    else:
+        await message.answer(
+            'You are not registered yet. '
+            'Start with /register to give bot access to your SG account.')
 
 
 async def handle_register(message: Message, state: FSMContext):

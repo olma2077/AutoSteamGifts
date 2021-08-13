@@ -22,12 +22,18 @@ MIN_POINTS_TO_ENTER = 10
 
 class SGUser:
     '''Handles user-related operations with steamgift giveaways'''
+    users = {}
+
     def __init__(self, tg_id: str, token: str, sections: List):
         '''Set necessary properties, start steamgifts session'''
         self.tg_id = tg_id
         self.token = token
         self.sections = sections
         self.sg_session = sg.SteamGiftsSession(tg_id, token)
+
+    async def get_points(self):
+        '''Return current amount of points for a user'''
+        return await self.sg_session.get_points()
 
     async def enter_giveaways(self):
         '''Enter giveaways for a user'''
@@ -58,6 +64,11 @@ class SGUser:
             else:
                 logging.info(f"{self.tg_id}: out of points!")
             logging.info(f"{self.tg_id}: end of section")
+
+
+async def user_status(idx: int):
+    '''Returns status string for a given user'''
+    return f'You have {await SGUser.users[str(idx)].get_points()} points unused.'
 
 
 def _parse_user(user: Dict) -> Optional[Dict]:
@@ -135,12 +146,11 @@ async def _sync_users(storage: JSONStorage, users: Dict) -> Dict:
 
 async def start_gw_entering(storage: JSONStorage):
     '''Cycle through registered users and enter giveaways for them'''
-    users = {}
     while True:
-        users = await _sync_users(storage, users)
+        SGUser.users = await _sync_users(storage, SGUser.users)
 
-        for user in users:
-            logging.info(f"{user}: polling user with sections: {users[user].sections}")
-            await users[user].enter_giveaways()
+        for user in SGUser.users.values():
+            logging.info(f"{user.tg_id}: polling user with sections: {user.sections}")
+            await user.enter_giveaways()
 
         await asyncio.sleep(SG_CYCLE)

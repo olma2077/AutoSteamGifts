@@ -9,6 +9,7 @@ import logging
 
 import autosg.tgbot as tgbot
 import autosg.sgbot as sgbot
+import autosg.config as config
 
 
 async def main():
@@ -20,14 +21,14 @@ async def main():
         level=logging.INFO,
         datefmt="%Y-%m-%d %H:%M:%S")
 
-    bot, storage, dispatcher = tgbot.init_tg()
+    storage, dispatcher = tgbot.init_tg()
     await tgbot.on_startup(dispatcher)
     try:
         await asyncio.gather(
             dispatcher.start_polling(),
             sgbot.start_gw_entering(storage))
     finally:
-        await bot.session.close()
+        await config.bot.session.close()
         await tgbot.on_shutdown(dispatcher)
 
 
