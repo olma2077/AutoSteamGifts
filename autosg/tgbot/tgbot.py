@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand
 from aiogram.contrib.fsm_storage.files import JSONStorage
 
-import autosg.config as config 
+import autosg.config as config
 from . import handlers
 
 from typing import TYPE_CHECKING
@@ -15,11 +15,13 @@ if TYPE_CHECKING:
     from typing import Tuple
 
 
-def init_tg() -> Tuple[Bot, JSONStorage, Dispatcher]:
+def init_tg() -> Tuple[JSONStorage, Dispatcher]:
     '''Initialize Telegram bot objects'''
     # import token from .env file
     load_dotenv()
     token = os.getenv('TELEGRAM_TOKEN')
+    if not token:
+        raise EnvironmentError('TELEGRAM_TOKEN is not defined!')
 
     config.bot = Bot(token=token)
     storage = JSONStorage('users.json')
