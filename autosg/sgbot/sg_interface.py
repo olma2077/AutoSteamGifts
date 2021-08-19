@@ -9,8 +9,6 @@ import aiohttp
 from tenacity import retry, stop_after_attempt, wait_fixed, wait_random
 from bs4 import BeautifulSoup
 
-from autosg.tgbot.handlers import notifications
-
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import List, Optional
@@ -155,7 +153,6 @@ class SteamGiftsSession:
             try:
                 json_data = json.loads(await entry.text())
                 if json_data['type'] == 'success':
-                    await notifications.notify_on_enter(self.tg_id, giveaway.name)
                     return True
 
                 logging.debug(f"{self.tg_id}: entry error: {json_data['msg']}")

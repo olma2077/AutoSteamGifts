@@ -9,6 +9,7 @@ import asyncio
 import logging
 
 from . import sg_interface as sg
+from autosg.tgbot.handlers import notifications
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -56,6 +57,7 @@ class SGUser:
                         else:
                             logging.info(f"{self.tg_id}: entered {giveaway.name}")
                             points -= giveaway.cost
+                            await notifications.notify_on_enter(self.tg_id, giveaway.name, points)
                             await asyncio.sleep(2)
 
                         if points < MIN_POINTS_TO_ENTER:
