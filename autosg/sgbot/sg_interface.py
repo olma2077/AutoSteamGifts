@@ -110,7 +110,7 @@ class SteamGiftsSession:
         '''
         soup = await self._get_soup_from_page(SG_URL)
         self._xsrf_token = soup.find('input', {'name': 'xsrf_token'})['value']
-        self._points = int(soup.find('span', class_='nav__points').text)
+        self._points = int(soup.find('span', class_='nav__points').text.replace(',', ''))
 
     async def get_points(self) -> int:
         '''Method to get current user's points value'''
