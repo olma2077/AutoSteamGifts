@@ -40,7 +40,7 @@ class SGUser:
         '''Return current amount of points for a user'''
         return await self.sg_session.get_points()
 
-    async def _enter_giveaways_section(self, section: str, min_points: int=MIN_POINTS_TO_ENTER):
+    async def _enter_giveaways_section(self, section: str, min_points: int = MIN_POINTS_TO_ENTER):
         '''Enter giveaways for a given section'''
         if self.points < min_points:
             logging.info(f"{self.tg_id}: out of points!")
