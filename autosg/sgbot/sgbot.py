@@ -85,7 +85,7 @@ class SGUser:
             logging.info(f"{self.tg_id}: too many points left, burning")
             await self._burn_points()
 
-        await notifications.notify_points_left(self.tg_id, self.points)
+        # await notifications.notify_points_left(self.tg_id, self.points)
 
 
 async def user_status(idx: int):
