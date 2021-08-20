@@ -146,11 +146,17 @@ async def _sync_users(storage: JSONStorage, users: Dict) -> Dict:
 
 async def start_gw_entering(storage: JSONStorage):
     '''Cycle through registered users and enter giveaways for them'''
-    while True:
-        SGUser.users = await _sync_users(storage, SGUser.users)
+    try:
+        while True:
+            SGUser.users = await _sync_users(storage, SGUser.users)
 
+            for user in SGUser.users.values():
+                logging.info(f"{user.tg_id}: polling user with sections: {user.sections}")
+                await user.enter_giveaways()
+
+            await asyncio.sleep(SG_CYCLE)
+    finally:
+        logging.info('Closing user sessions…')
         for user in SGUser.users.values():
-            logging.info(f"{user.tg_id}: polling user with sections: {user.sections}")
-            await user.enter_giveaways()
-
-        await asyncio.sleep(SG_CYCLE)
+            await user.sg_session.session.close()
+        logging.info('User sessions closed')
