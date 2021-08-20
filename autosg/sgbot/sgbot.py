@@ -56,7 +56,7 @@ class SGUser:
             else:
                 logging.info(f"{self.tg_id}: entered {giveaway.name}")
                 self.points -= giveaway.cost
-                await notifications.notify_on_enter(self.tg_id, giveaway.name, self.points)
+                await notifications.notify_on_enter(self.tg_id, giveaway.name)
                 await asyncio.sleep(2)
 
             if self.points < min_points:
@@ -84,6 +84,8 @@ class SGUser:
         if self.points > MAX_POINTS_TO_KEEP:
             logging.info(f"{self.tg_id}: too many points left, burning")
             await self._burn_points()
+
+        await notifications.notify_points_left(self.tg_id, self.points)
 
 
 async def user_status(idx: int):
