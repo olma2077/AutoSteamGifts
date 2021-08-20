@@ -1,6 +1,5 @@
 '''Implements interface to SteamGifts site for entering giveaways'''
 from __future__ import annotations
-import asyncio
 import json
 import logging
 from dataclasses import dataclass
@@ -11,7 +10,7 @@ from bs4 import BeautifulSoup
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import List, Optional
+    from typing import Optional, Generator
     from aiohttp import ClientSession
 
 
@@ -65,16 +64,13 @@ def _get_giveaway_from_soup(soup: BeautifulSoup) -> Giveaway:
     return Giveaway(giveaway_id, game_name, game_cost)
 
 
-def _get_giveaways_from_soup_page(soup: BeautifulSoup) -> List[Giveaway]:
+def _get_giveaways_from_soup_page(soup: BeautifulSoup) -> Generator[Giveaway, None, None]:
     '''Get list of giveaways from a page soup'''
-    giveaways = []
 
     for item in soup.find_all('div', class_='giveaway__row-inner-wrap'):
         if 'is-faded' in item['class']:
             continue
-        giveaways.append(_get_giveaway_from_soup(item))
-
-    return giveaways
+        yield _get_giveaway_from_soup(item)
 
 
 @dataclass
@@ -117,11 +113,9 @@ class SteamGiftsSession:
         await self._update_session()
         return self._points
 
-    async def get_giveaways_from_section(self, section: str) -> List[Giveaway]:
+    async def get_giveaways_from_section(self, section: str) -> Generator[Giveaway, None, None]:
         '''Collect all giveaways for a given section'''
         await self._update_session()
-
-        giveaways = []
 
         page = 1
         while True:
@@ -135,12 +129,10 @@ class SteamGiftsSession:
                 logging.info(f"{self.tg_id}: page {page} of {section} section is empty, finishing")
                 break
 
-            giveaways += _get_giveaways_from_soup_page(soup)
+            for giveaway in _get_giveaways_from_soup_page(soup):
+                yield giveaway
 
             page += 1
-            await asyncio.sleep(2)
-
-        return giveaways
 
     async def enter_giveaway(self, giveaway: Giveaway) -> bool:
         '''Enter a game's giveaway'''

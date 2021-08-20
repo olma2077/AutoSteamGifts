@@ -44,25 +44,23 @@ class SGUser:
             points = await self.sg_session.get_points()
             if points > MIN_POINTS_TO_ENTER:
                 logging.info(f"{self.tg_id}: starting with {points} points")
-                giveaways = await self.sg_session.get_giveaways_from_section(section)
 
-                if len(giveaways):
-                    for giveaway in giveaways:
-                        if giveaway.cost > points:
-                            logging.info(f"{self.tg_id}: {giveaway.name} is too expensive for now!")
-                            continue
+                async for giveaway in self.sg_session.get_giveaways_from_section(section):
+                    if giveaway.cost > points:
+                        logging.info(f"{self.tg_id}: {giveaway.name} is too expensive for now!")
+                        continue
 
-                        if not await self.sg_session.enter_giveaway(giveaway):
-                            logging.debug(f"{self.tg_id}: could not enter {giveaway.name}")
-                        else:
-                            logging.info(f"{self.tg_id}: entered {giveaway.name}")
-                            points -= giveaway.cost
-                            await notifications.notify_on_enter(self.tg_id, giveaway.name, points)
-                            await asyncio.sleep(2)
+                    if not await self.sg_session.enter_giveaway(giveaway):
+                        logging.debug(f"{self.tg_id}: could not enter {giveaway.name}")
+                    else:
+                        logging.info(f"{self.tg_id}: entered {giveaway.name}")
+                        points -= giveaway.cost
+                        await notifications.notify_on_enter(self.tg_id, giveaway.name, points)
+                        await asyncio.sleep(2)
 
-                        if points < MIN_POINTS_TO_ENTER:
-                            logging.info(f"{self.tg_id}: out of points!")
-                            return
+                    if points < MIN_POINTS_TO_ENTER:
+                        logging.info(f"{self.tg_id}: out of points!")
+                        return
             else:
                 logging.info(f"{self.tg_id}: out of points!")
             logging.info(f"{self.tg_id}: end of section")
