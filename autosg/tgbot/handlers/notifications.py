@@ -6,7 +6,7 @@ async def notify_on_enter(user_id: str, game: str):
     '''Notify user when entered a giveaway'''
     await config.bot.send_message(
         user_id,
-        f'Just entered giveaway of {game}.\n{points} points left.')
+        f'Just entered giveaway of {game}.')
 
 
 async def notify_points_left(user_id: str, points: int):
