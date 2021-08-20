@@ -19,6 +19,9 @@ if TYPE_CHECKING:
 
 SG_CYCLE = 1800
 MIN_POINTS_TO_ENTER = 10
+MAX_POINTS_TO_KEEP = 350
+MIN_POINTS = 0
+MAX_POINTS = 400
 
 
 class SGUser:
@@ -31,39 +34,56 @@ class SGUser:
         self.token = token
         self.sections = sections
         self.sg_session = sg.SteamGiftsSession(tg_id, token)
+        self.points = 0
 
     async def get_points(self):
         '''Return current amount of points for a user'''
         return await self.sg_session.get_points()
 
+    async def _enter_giveaways_section(self, section, min_points=MIN_POINTS_TO_ENTER):
+        '''Enter giveaways for a given section'''
+        if self.points < min_points:
+            logging.info(f"{self.tg_id}: out of points!")
+            return
+
+        async for giveaway in self.sg_session.get_giveaways_from_section(section):
+            if giveaway.cost > self.points:
+                logging.info(f"{self.tg_id}: {giveaway.name} is too expensive for now!")
+                continue
+
+            if not await self.sg_session.enter_giveaway(giveaway):
+                logging.debug(f"{self.tg_id}: could not enter {giveaway.name}")
+            else:
+                logging.info(f"{self.tg_id}: entered {giveaway.name}")
+                self.points -= giveaway.cost
+                await notifications.notify_on_enter(self.tg_id, giveaway.name, self.points)
+                await asyncio.sleep(2)
+
+            if self.points < min_points:
+                logging.info(f"{self.tg_id}: out of points!")
+                return
+
+    async def _burn_points(self):
+        '''Burn points for a user in case there are too many unused points left'''
+        await self._enter_giveaways_section('All', MAX_POINTS_TO_KEEP)
+
     async def enter_giveaways(self):
         '''Enter giveaways for a user'''
+        self.points = await self.sg_session.get_points()
+
         for section in self.sections:
             logging.info(f"{self.tg_id}: polling section {section}")
 
-            points = await self.sg_session.get_points()
-            if points > MIN_POINTS_TO_ENTER:
-                logging.info(f"{self.tg_id}: starting with {points} points")
-
-                async for giveaway in self.sg_session.get_giveaways_from_section(section):
-                    if giveaway.cost > points:
-                        logging.info(f"{self.tg_id}: {giveaway.name} is too expensive for now!")
-                        continue
-
-                    if not await self.sg_session.enter_giveaway(giveaway):
-                        logging.debug(f"{self.tg_id}: could not enter {giveaway.name}")
-                    else:
-                        logging.info(f"{self.tg_id}: entered {giveaway.name}")
-                        points -= giveaway.cost
-                        await notifications.notify_on_enter(self.tg_id, giveaway.name, points)
-                        await asyncio.sleep(2)
-
-                    if points < MIN_POINTS_TO_ENTER:
-                        logging.info(f"{self.tg_id}: out of points!")
-                        return
+            if self.points > MIN_POINTS_TO_ENTER:
+                logging.info(f"{self.tg_id}: starting with {self.points} points")
+                await self._enter_giveaways_section(section)
             else:
                 logging.info(f"{self.tg_id}: out of points!")
-            logging.info(f"{self.tg_id}: end of section")
+                return
+
+        if self.points > MAX_POINTS_TO_KEEP:
+            logging.info(f"{self.tg_id}: too many points left, burning")
+            await self._burn_points()
 
 
 async def user_status(idx: int):
