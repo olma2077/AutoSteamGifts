@@ -9,6 +9,7 @@ import asyncio
 import logging
 
 from . import sg_interface as sg
+from . import steam_rating as sr
 from autosg.tgbot.handlers import notifications
 
 from typing import TYPE_CHECKING
@@ -17,9 +18,12 @@ if TYPE_CHECKING:
     from aiogram.contrib.fsm_storage.files import JSONStorage
 
 
-SG_CYCLE = 1800
+SG_CYCLE = 3600
 MIN_POINTS_TO_ENTER = 10
 MAX_POINTS_TO_KEEP = 350
+BURN_POINTS = 380
+BURN_SECTION = 'All'
+BURN_GAME_SET = 100
 MIN_POINTS = 0
 MAX_POINTS = 400
 
@@ -65,7 +69,32 @@ class SGUser:
 
     async def _burn_points(self):
         '''Burn points for a user in case there are too many unused points left'''
-        await self._enter_giveaways_section('All', MAX_POINTS_TO_KEEP)
+        giveaways = []
+        i = 0
+        async for giveaway in self.sg_session.get_giveaways_from_section(BURN_SECTION):
+            giveaways.append(giveaway)
+            i += 1
+            if i > BURN_GAME_SET:
+                break
+
+        giveaways_ranking = sr.get_ranking([giveaway.steam_id for giveaway in giveaways])
+        giveaways = sorted(
+            giveaways,
+            key=lambda giveaway: giveaways_ranking[giveaway.steam_id],
+            reverse=True)
+
+        for giveaway in giveaways:
+            if not await self.sg_session.enter_giveaway(giveaway):
+                logging.debug(f"{self.tg_id}: could not enter {giveaway.name}")
+            else:
+                logging.info(f"{self.tg_id}: entered {giveaway.name}")
+                self.points -= giveaway.cost
+                await notifications.notify_on_enter(self.tg_id, giveaway.name)
+                await asyncio.sleep(2)
+
+            if self.points < MAX_POINTS_TO_KEEP:
+                logging.info(f"{self.tg_id}: burned enough points.")
+                return
 
     async def enter_giveaways(self):
         '''Enter giveaways for a user'''
@@ -81,11 +110,9 @@ class SGUser:
                 logging.info(f"{self.tg_id}: out of points!")
                 return
 
-        if self.points > MAX_POINTS_TO_KEEP:
+        if self.points > BURN_POINTS:
             logging.info(f"{self.tg_id}: too many points left, burning")
             await self._burn_points()
-
-        # await notifications.notify_points_left(self.tg_id, self.points)
 
 
 async def user_status(idx: int):

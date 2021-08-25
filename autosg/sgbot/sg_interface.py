@@ -59,9 +59,13 @@ def _get_giveaway_from_soup(soup: BeautifulSoup) -> Giveaway:
         'a',
         class_='giveaway__heading__name')['href'].split('/')[2]
 
-    logging.debug(f"{game_name} ({giveaway_id}): {game_cost}")
+    steam_id = soup.find(
+        'a',
+        target='_blank')['href'].split('/')[-2]
 
-    return Giveaway(giveaway_id, game_name, game_cost)
+    logging.debug(f"{game_name} ({steam_id}/{giveaway_id}): {game_cost}")
+
+    return Giveaway(steam_id, giveaway_id, game_name, game_cost)
 
 
 def _get_giveaways_from_soup_page(soup: BeautifulSoup) -> Generator[Giveaway, None, None]:
@@ -76,7 +80,8 @@ def _get_giveaways_from_soup_page(soup: BeautifulSoup) -> Generator[Giveaway, No
 @dataclass
 class Giveaway:
     '''Giveaway parameters object'''
-    def __init__(self, code: str, name: str, cost: int):
+    def __init__(self, steam_id: str, code: str, name: str, cost: int):
+        self.steam_id = steam_id
         self.code = code
         self.name = name
         self.cost = cost
