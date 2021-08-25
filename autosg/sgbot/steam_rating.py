@@ -1,7 +1,9 @@
 '''Calculates rating of games provided by steam id
 Credits go to woctezuma:
 https://github.com/woctezuma/Steam-Bayesian-Average
+
 '''
+from __future__ import annotations
 import steamspypi
 
 from typing import TYPE_CHECKING
