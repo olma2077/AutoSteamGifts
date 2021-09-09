@@ -4,3 +4,5 @@ __pycache__/
 .vscode/
 .env
 users.json
+.coverage
+.pytest_cache/
