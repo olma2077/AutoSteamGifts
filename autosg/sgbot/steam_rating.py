@@ -68,8 +68,11 @@ def get_steamspy_data(game_id: str) -> Dict:
 
     data = steamspypi.download(data_request)
 
-    return {'positive': data['positive'],
-            'negative': data['negative']}
+    try:
+        return {'positive': data['positive'],
+                'negative': data['negative']}
+    except KeyError:
+        print(data)
 
 
 def get_ranking(game_ids: list[str]) -> Dict:
