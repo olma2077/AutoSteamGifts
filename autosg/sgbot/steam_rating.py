@@ -73,6 +73,8 @@ def get_steamspy_data(game_id: str) -> Dict:
                 'negative': data['negative']}
     except KeyError:
         print(data)
+        return {'positive': 1,
+                'negative': 1}
 
 
 def get_ranking(game_ids: list[str]) -> Dict:
