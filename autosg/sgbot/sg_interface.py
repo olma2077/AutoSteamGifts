@@ -35,7 +35,7 @@ async def verify_token(token: str, session: Optional[ClientSession] = None) -> b
     return await _verify_token(token, session)
 
 
-@retry(stop=stop_after_attempt(10), wait=wait_fixed(3) + wait_random(0, 2))
+@retry(stop=stop_after_attempt(10), wait=wait_fixed(5) + wait_random(0, 5))
 async def _verify_token(token: str, session: ClientSession) -> bool:
     '''Helper to verify user-provided SteamGifts token using existing session'''
     cookies = {'PHPSESSID': token}
