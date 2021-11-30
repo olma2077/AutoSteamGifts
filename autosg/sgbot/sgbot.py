@@ -123,6 +123,7 @@ async def user_status(idx: int):
 def _parse_user(user: Dict) -> Optional[Dict]:
     '''Parse user data from Telegram storage entry'''
     if 'token' not in user[1][user[0]]['data']:
+        logging.debug(f'{user[0]}: no configuration present, skipping')
         return None
 
     idx = user[0]
@@ -177,7 +178,7 @@ def _add_users(storage_users: Dict, users: Dict) -> Dict:
             users[user_id] = SGUser(user['tg_id'],
                                     user['token'],
                                     user['sections'])
-            logging.info(f"{user_id}: added user to poll")
+            logging.warning(f"{user_id}: added user to poll")
 
     return users
 

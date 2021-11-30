@@ -5,12 +5,14 @@ import logging
 from dataclasses import dataclass
 
 import aiohttp
-from tenacity import retry, stop_after_attempt, wait_fixed, wait_random
+from tenacity import retry
+from tenacity.stop import stop_after_attempt
+from tenacity.wait import  wait_fixed, wait_random
 from bs4 import BeautifulSoup
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import Optional, Generator
+    from typing import Optional, Generator, AsyncGenerator
     from aiohttp import ClientSession
 
 
@@ -47,7 +49,7 @@ async def _verify_token(token: str, session: ClientSession) -> bool:
 def _get_giveaway_from_soup(soup: BeautifulSoup) -> Giveaway:
     '''Get givwaway info from a giveaway soup'''
     giveaway = Giveaway()
-
+    # Fix: handle soup None return value in a proper way
     try:
         giveaway.cost = int(
             soup.find_all(
@@ -67,13 +69,13 @@ def _get_giveaway_from_soup(soup: BeautifulSoup) -> Giveaway:
                 'a',
                 target='_blank')['href'].split('/')[-2]
         except TypeError:
-            pass
+            logging.debug(f"Giveaway {giveaway.name} ({giveaway.code}) doesn't have steam_id")
 
         logging.debug(f"{giveaway}")
         return giveaway
 
     except Exception:
-        logging.error(soup.prettify())
+        logging.error(f'Failed to parse giveaway: \n {soup.prettify()}')
         raise
 
 
@@ -126,7 +128,7 @@ class SteamGiftsSession:
         await self._update_session()
         return self._points
 
-    async def get_giveaways_from_section(self, section: str) -> Generator[Giveaway, None, None]:
+    async def get_giveaways_from_section(self, section: str) -> AsyncGenerator[Giveaway, None]:
         '''Collect all giveaways for a given section'''
         await self._update_session()
 
@@ -160,8 +162,9 @@ class SteamGiftsSession:
                 if json_data['type'] == 'success':
                     return True
 
-                logging.debug(f"{self.tg_id}: entry error: {json_data['msg']}")
+                logging.warning(f"{self.tg_id}: entry error: {json_data['msg']}")
                 return False
+
             except Exception:
-                logging.error(f"{self.tg_id}: could not parse json:\n {entry.text()}")
+                logging.error(f"{self.tg_id}: could not parse json: \n {entry.text()}")
                 raise

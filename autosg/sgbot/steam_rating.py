@@ -4,6 +4,7 @@ https://github.com/woctezuma/Steam-Bayesian-Average
 
 '''
 from __future__ import annotations
+import logging
 import steamspypi
 
 from typing import TYPE_CHECKING
@@ -18,10 +19,7 @@ def compute_game_increment_value(game: Dict) -> int:
 
 def compute_game_raw_score(game: Dict) -> int:
     '''Compute raws score for a game'''
-    try:
-        return game['positive'] / (game['positive'] + game['negative'])
-    except ZeroDivisionError:
-        return 0
+    return game['positive'] / (game['positive'] + game['negative'])
 
 
 def compute_game_num_votes(game: Dict) -> int:
@@ -78,7 +76,7 @@ def get_steamspy_data(game_id: str) -> Dict:
         return {'positive': data['positive'],
                 'negative': data['negative']}
     except KeyError:
-        print(data)
+        logging.warning(f'Wrong SteamSpy data for {game_id}: {data}')
         return dummy_data
 
 

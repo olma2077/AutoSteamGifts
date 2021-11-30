@@ -16,7 +16,7 @@ async def main():
     '''
     logging.basicConfig(
         format="[%(asctime)s] %(levelname)s | %(module)s: %(message)s",
-        level=logging.INFO,
+        level=logging.WARNING,
         datefmt="%Y-%m-%d %H:%M:%S")
 
     storage, dispatcher = tgbot.init_tg()
@@ -26,6 +26,7 @@ async def main():
             dispatcher.start_polling(),
             sgbot.start_gw_entering(storage))
     finally:
+        logging.warning('Exiting...')
         await config.bot.session.close()
         await tgbot.on_shutdown(dispatcher)
 
