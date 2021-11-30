@@ -162,7 +162,9 @@ class SteamGiftsSession:
                 if json_data['type'] == 'success':
                     return True
 
-                logging.warning(f"{self.tg_id}: entry error: {json_data['msg']}")
+                if json_data['msg'] != 'Previously Won':
+                    logging.warning(f"{self.tg_id}: entry error: {json_data['msg']}")
+
                 return False
 
             except Exception:
