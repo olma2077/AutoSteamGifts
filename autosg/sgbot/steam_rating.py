@@ -62,6 +62,12 @@ def compute_bayesian_average_for_games(games: Dict) -> Dict:
 
 def get_steamspy_data(game_id: str) -> Dict:
     '''Get votes info from SteamSpy for a game'''
+    dummy_data = {'positive': 1,
+                  'negative': 1}
+
+    if not game_id:
+        return dummy_data
+
     data_request = {}
     data_request['request'] = 'appdetails'
     data_request['appid'] = game_id
@@ -73,8 +79,7 @@ def get_steamspy_data(game_id: str) -> Dict:
                 'negative': data['negative']}
     except KeyError:
         print(data)
-        return {'positive': 1,
-                'negative': 1}
+        return dummy_data
 
 
 def get_ranking(game_ids: list[str]) -> Dict:

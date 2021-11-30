@@ -46,26 +46,35 @@ async def _verify_token(token: str, session: ClientSession) -> bool:
 
 def _get_giveaway_from_soup(soup: BeautifulSoup) -> Giveaway:
     '''Get givwaway info from a giveaway soup'''
-    game_cost = int(
-        soup.find_all(
-            'span',
-            class_='giveaway__heading__thin')[-1].text.strip('(P)'))
+    giveaway = Giveaway()
 
-    game_name = soup.find(
-        'a',
-        class_='giveaway__heading__name').text
+    try:
+        giveaway.cost = int(
+            soup.find_all(
+                'span',
+                class_='giveaway__heading__thin')[-1].text.strip('(P)'))
 
-    giveaway_id = soup.find(
-        'a',
-        class_='giveaway__heading__name')['href'].split('/')[2]
+        giveaway.name = soup.find(
+            'a',
+            class_='giveaway__heading__name').text
 
-    steam_id = soup.find(
-        'a',
-        target='_blank')['href'].split('/')[-2]
+        giveaway.code = soup.find(
+            'a',
+            class_='giveaway__heading__name')['href'].split('/')[2]
 
-    logging.debug(f"{game_name} ({steam_id}/{giveaway_id}): {game_cost}")
+        try:
+            giveaway.steam_id = soup.find(
+                'a',
+                target='_blank')['href'].split('/')[-2]
+        except TypeError:
+            pass
 
-    return Giveaway(steam_id, giveaway_id, game_name, game_cost)
+        logging.debug(f"{giveaway}")
+        return giveaway
+
+    except Exception:
+        logging.error(soup.prettify())
+        raise
 
 
 def _get_giveaways_from_soup_page(soup: BeautifulSoup) -> Generator[Giveaway, None, None]:
@@ -80,11 +89,10 @@ def _get_giveaways_from_soup_page(soup: BeautifulSoup) -> Generator[Giveaway, No
 @dataclass
 class Giveaway:
     '''Giveaway parameters object'''
-    def __init__(self, steam_id: str, code: str, name: str, cost: int):
-        self.steam_id = steam_id
-        self.code = code
-        self.name = name
-        self.cost = cost
+    code: str = ''
+    name: str = ''
+    cost: int = 0
+    steam_id: str = ''
 
 
 class SteamGiftsSession:
