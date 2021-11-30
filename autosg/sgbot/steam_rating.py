@@ -19,7 +19,10 @@ def compute_game_increment_value(game: Dict) -> int:
 
 def compute_game_raw_score(game: Dict) -> int:
     '''Compute raws score for a game'''
-    return game['positive'] / (game['positive'] + game['negative'])
+    try:
+        return game['positive'] / (game['positive'] + game['negative'])
+    except ZeroDivisionError:
+        return 0
 
 
 def compute_game_num_votes(game: Dict) -> int:
@@ -60,11 +63,11 @@ def compute_bayesian_average_for_games(games: Dict) -> Dict:
 
 def get_steamspy_data(game_id: str) -> Dict:
     '''Get votes info from SteamSpy for a game'''
-    dummy_data = {'positive': 1,
-                  'negative': 1}
+    empty_data = {'positive': 0,
+                  'negative': 0}
 
     if not game_id:
-        return dummy_data
+        return empty_data
 
     data_request = {}
     data_request['request'] = 'appdetails'
@@ -77,7 +80,7 @@ def get_steamspy_data(game_id: str) -> Dict:
                 'negative': data['negative']}
     except KeyError:
         logging.warning(f'Wrong SteamSpy data for {game_id}: {data}')
-        return dummy_data
+        return empty_data
 
 
 def get_ranking(game_ids: list[str]) -> Dict:
