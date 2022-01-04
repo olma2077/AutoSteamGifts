@@ -18,7 +18,8 @@ if TYPE_CHECKING:
     from aiogram.contrib.fsm_storage.files import JSONStorage
 
 
-SG_CYCLE = 3600
+SG_CYCLE = 14400
+SG_USERS_DELAY = 1800
 MIN_POINTS_TO_ENTER = 10
 MAX_POINTS_TO_KEEP = 350
 BURN_POINTS = 380
@@ -203,6 +204,7 @@ async def start_gw_entering(storage: JSONStorage):
             for user in SGUser.users.values():
                 logging.info(f"{user.tg_id}: polling user with sections: {user.sections}")
                 await user.enter_giveaways()
+                await asyncio.sleep(SG_USERS_DELAY)
 
             await asyncio.sleep(SG_CYCLE)
     finally:
