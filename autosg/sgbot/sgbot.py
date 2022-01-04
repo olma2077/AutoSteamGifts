@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 SG_CYCLE = 14400
 SG_USERS_DELAY = 1800
+SG_GIVEAWAY_DELAY = 2
 MIN_POINTS_TO_ENTER = 10
 MAX_POINTS_TO_KEEP = 350
 BURN_POINTS = 380
@@ -62,11 +63,11 @@ class SGUser:
                 logging.info(f"{self.tg_id}: entered {giveaway.name}")
                 self.points -= giveaway.cost
                 await notifications.notify_on_enter(self.tg_id, giveaway.name)
-                await asyncio.sleep(2)
 
             if self.points < min_points:
                 logging.info(f"{self.tg_id}: out of points!")
                 return
+
 
     async def _burn_points(self):
         '''Burn points for a user in case there are too many unused points left'''
@@ -91,7 +92,6 @@ class SGUser:
                 logging.info(f"{self.tg_id}: entered {giveaway.name}")
                 self.points -= giveaway.cost
                 await notifications.notify_on_enter(self.tg_id, giveaway.name)
-                await asyncio.sleep(2)
 
             if self.points < MAX_POINTS_TO_KEEP:
                 logging.info(f"{self.tg_id}: burned enough points.")

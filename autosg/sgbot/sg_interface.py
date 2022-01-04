@@ -5,9 +5,10 @@ import logging
 from dataclasses import dataclass
 
 import aiohttp
+import asyncio
 from tenacity import retry
 from tenacity.stop import stop_after_attempt
-from tenacity.wait import  wait_fixed, wait_random
+from tenacity.wait import wait_fixed, wait_random
 from bs4 import BeautifulSoup
 
 from typing import TYPE_CHECKING
@@ -160,6 +161,7 @@ class SteamGiftsSession:
             try:
                 json_data = json.loads(await entry.text())
                 if json_data['type'] == 'success':
+                    await asyncio.sleep(2)
                     return True
 
                 if json_data['msg'] != 'Previously Won':
