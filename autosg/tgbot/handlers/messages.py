@@ -16,7 +16,7 @@ def register_commands(dispatcher: Dispatcher):
     '''Register message handlers in dispatcher'''
     dispatcher.register_message_handler(handle_start, commands=['start'])
     dispatcher.register_message_handler(handle_status, commands=['status'])
-    dispatcher.register_message_handler(handle_register, commands=['register'])
+    # dispatcher.register_message_handler(handle_register, commands=['register'])
     dispatcher.register_message_handler(handle_configure, commands=['configure'])
     dispatcher.register_message_handler(handle_unregister, commands=['unregister'])
     dispatcher.register_message_handler(handle_token)
@@ -45,17 +45,17 @@ async def handle_status(message: Message, state: FSMContext):
             'Start with /register to give bot access to your SG account.')
 
 
-async def handle_register(message: Message, state: FSMContext):
-    '''Handle /register command from a user'''
-    if 'token' in await state.get_data():
-        await message.answer(
-            "You've already registered your token.\n"
-            "To update PHPSESSID, /unregister first.")
-    else:
-        await message.answer(
-            'To authenticate on SteamGifts, this bot needs your PHPSESSID.\n'
-            'You can find it in your browser cookies when logged in on SteamGifts. '
-            'Please, provide its content below.')
+# async def handle_register(message: Message, state: FSMContext):
+#     '''Handle /register command from a user'''
+#     if 'token' in await state.get_data():
+#         await message.answer(
+#             "You've already registered your token.\n"
+#             "To update PHPSESSID, /unregister first.")
+#     else:
+#         await message.answer(
+#             'To authenticate on SteamGifts, this bot needs your PHPSESSID.\n'
+#             'You can find it in your browser cookies when logged in on SteamGifts. '
+#             'Please, provide its content below.')
 
 
 async def handle_configure(message: Message, state: FSMContext):
@@ -81,20 +81,23 @@ async def handle_unregister(message: Message, state: FSMContext):
 
 
 async def handle_token(message: Message, state: FSMContext):
-    '''Handle any text message from a user as a SteamGifts token'''
-    if 'token' in await state.get_data():
-        await message.answer(
-            "You've already registered your token.\n"
-            "To update PHPSESSID, /unregister first.")
-    elif await sgbot.verify_token(message.text):
-        await state.update_data(
-            token=message.text,
-            sections=list(sgbot.SECTION_URLS)[0:1])
-        await message.answer(
-            'Your PHPSESSID was successfully registered.\n'
-            'Bot will start entering giveaways for you. /configure to change default settings.')
-        logging.warning(f"{message.from_user.id}: new user registered!")
-    else:
-        await message.answer(
-            'Provided PHPSESSID is invalid.\n'
-            'Please, verify it and provide it again below.')
+    # '''Handle any text message from a user as a SteamGifts token'''
+    # if 'token' in await state.get_data():
+    #     await message.answer(
+    #         "You've already registered your token.\n"
+    #         "To update PHPSESSID, /unregister first.")
+    # elif await sgbot.verify_token(message.text):
+    #     await state.update_data(
+    #         token=message.text,
+    #         sections=list(sgbot.SECTION_URLS)[0:1])
+    #     await message.answer(
+    #         'Your PHPSESSID was successfully registered.\n'
+    #         'Bot will start entering giveaways for you. /configure to change default settings.')
+    #     logging.warning(f"{message.from_user.id}: new user registered!")
+    # else:
+    #     await message.answer(
+    #         'Provided PHPSESSID is invalid.\n'
+    #         'Please, verify it and provide it again below.')
+    await message.answer(
+        'Unknown command.\n'
+        'Please, try again.')
