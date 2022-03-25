@@ -1,4 +1,5 @@
-'''Calculates rating of games provided by steam id
+'''
+Calculates rating of games provided by steam id
 Credits go to woctezuma:
 https://github.com/woctezuma/Steam-Bayesian-Average
 
