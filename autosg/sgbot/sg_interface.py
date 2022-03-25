@@ -1,19 +1,21 @@
 '''Implements interface to SteamGifts site for entering giveaways'''
 from __future__ import annotations
+
+import asyncio
 import json
 import logging
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import aiohttp
-import asyncio
+from bs4 import BeautifulSoup
 from tenacity import retry
 from tenacity.stop import stop_after_attempt
 from tenacity.wait import wait_fixed, wait_random
-from bs4 import BeautifulSoup
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import Optional, Generator, AsyncGenerator
+    from typing import AsyncGenerator, Generator, Optional
+
     from aiohttp import ClientSession
 
 

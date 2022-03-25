@@ -5,16 +5,19 @@ isolated in sg_interface.
 
 '''
 from __future__ import annotations
+
 import asyncio
 import logging
+from typing import TYPE_CHECKING
+
+from autosg.tgbot.handlers import notifications
 
 from . import sg_interface as sg
 from . import steam_rating as sr
-from autosg.tgbot.handlers import notifications
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import List, Optional, Dict
+    from typing import Dict, List, Optional
+
     from aiogram.contrib.fsm_storage.files import JSONStorage
 
 

@@ -1,12 +1,12 @@
 '''Defines keyboards' markups'''
 from __future__ import annotations
 
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from typing import TYPE_CHECKING
+
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from autosg import sgbot
 from emoji import emojize
 
-from autosg import sgbot
-
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from aiogram.dispatcher import FSMContext
 

@@ -1,15 +1,17 @@
 '''Process messages from a user'''
 from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from autosg import sgbot
+
 from .markups import sections_kb
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from aiogram import Dispatcher
-    from aiogram.types import Message
     from aiogram.dispatcher import FSMContext
+    from aiogram.types import Message
 
 
 def register_commands(dispatcher: Dispatcher):

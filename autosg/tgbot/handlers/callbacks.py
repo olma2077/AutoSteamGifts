@@ -1,16 +1,17 @@
 '''Process callbacks from users' interactions with keyboards'''
 from __future__ import annotations
+
 from contextlib import suppress
+from typing import TYPE_CHECKING
 
 from aiogram.utils.exceptions import MessageNotModified
 
 from .markups import sections_kb
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from aiogram import Dispatcher
-    from aiogram.types import CallbackQuery
     from aiogram.dispatcher import FSMContext
+    from aiogram.types import CallbackQuery
 
 
 def register_callbacks(dispatcher: Dispatcher):
