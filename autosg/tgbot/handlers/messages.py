@@ -82,8 +82,9 @@ async def handle_unregister(message: Message, state: FSMContext):
         await message.answer('You should /register first.')
 
 
-async def handle_token(message: Message, state: FSMContext):
-    # '''Handle any text message from a user as a SteamGifts token'''
+async def handle_token(message: Message):
+    # async def handle_token(message: Message, state: FSMContext):
+    '''Handle any text message from a user as a SteamGifts token'''
     # if 'token' in await state.get_data():
     #     await message.answer(
     #         "You've already registered your token.\n"
