@@ -1,6 +1,6 @@
 aiogram==2.19
 beautifulsoup4==4.10.0
-emoji==1.4.1
+emoji==1.7.0
 flake8==3.9.2
 python-dotenv==0.19.0
 tenacity==8.0.1
