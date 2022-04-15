@@ -117,6 +117,7 @@ class SteamGiftsSession:
             soup = BeautifulSoup(await response.text(), 'html.parser')
         return soup
 
+    @retry(stop=stop_after_attempt(10), wait=wait_fixed(5) + wait_random(0, 5))
     async def _update_session(self):
         '''Get current user's parameters on SteamGifts
 
