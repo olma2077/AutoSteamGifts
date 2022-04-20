@@ -1,4 +1,4 @@
-aiogram==2.19
+aiogram==2.20
 beautifulsoup4==4.11.1
 emoji==1.7.0
 flake8==4.0.1
