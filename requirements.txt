@@ -1,7 +1,7 @@
-aiogram==2.22.1
+aiogram==2.22.2
 beautifulsoup4==4.11.1
-emoji==2.0.0
+emoji==2.1.0
 flake8==5.0.4
 python-dotenv==0.21.0
-tenacity==8.0.1
+tenacity==8.1.0
 steamspypi==1.1.1
