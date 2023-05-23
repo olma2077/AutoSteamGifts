@@ -7,6 +7,7 @@ https://github.com/woctezuma/Steam-Bayesian-Average
 from __future__ import annotations
 
 import logging
+from json.decoder import JSONDecodeError
 from typing import TYPE_CHECKING
 
 import steamspypi
@@ -76,7 +77,12 @@ def get_steamspy_data(game_id: str) -> Dict:
     data_request['request'] = 'appdetails'
     data_request['appid'] = game_id
 
-    data = steamspypi.download(data_request)
+
+    try:
+        data = steamspypi.download(data_request)
+    except JSONDecodeError:
+        logging.warning(f'Failed to fetch SteamSpy data for {game_id}')
+        data = empty_data
 
     try:
         return {'positive': data['positive'],
