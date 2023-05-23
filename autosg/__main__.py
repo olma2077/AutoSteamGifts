@@ -27,7 +27,7 @@ async def main():
             sgbot.start_gw_entering(storage))
     finally:
         logging.warning('Exiting...')
-        await config.bot.session.close()
+        await config.bot.close()
         await tgbot.on_shutdown(dispatcher)
 
 
