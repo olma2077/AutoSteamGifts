@@ -146,6 +146,8 @@ async def _get_users_from_storage(storage: JSONStorage) -> Dict:
         if user:
             if await sg.verify_token(user['token']):
                 users[user['tg_id']] = user
+            else:
+                logging.info(f"{user['tg_id']}: sg token is invalid, needs to be updated")
 
     return users
 
