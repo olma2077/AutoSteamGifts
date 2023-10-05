@@ -101,6 +101,10 @@ class SGUser:
 
     async def enter_giveaways(self):
         '''Enter giveaways for a user'''
+        if not await sg.verify_token(self.token):
+            logging.info(f"{self.tg_id}: sg token is invalid, needs to be updated")
+            return
+
         self.points = await self.sg_session.get_points()
 
         for section in self.sections:
@@ -143,11 +147,7 @@ async def _get_users_from_storage(storage: JSONStorage) -> Dict:
     users = {}
     for user_entry in storage.data.items():
         user = _parse_user(user_entry)
-        if user:
-            if await sg.verify_token(user['token']):
-                users[user['tg_id']] = user
-            else:
-                logging.info(f"{user['tg_id']}: sg token is invalid, needs to be updated")
+        users[user['tg_id']] = user
 
     return users
 
@@ -160,7 +160,7 @@ async def _cleanup_users(storage_users: Dict, users: Dict) -> Dict:
             new_users[user] = users[user]
         else:
             await users[user].sg_session.session.close()
-            logging.info(f"{user}: sg token became invalid, removing user from poll")
+            logging.info(f"{user}: user opted out in Telegram bot, removing from poll")
 
     return new_users
 
