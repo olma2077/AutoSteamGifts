@@ -147,7 +147,8 @@ async def _get_users_from_storage(storage: JSONStorage) -> Dict:
     users = {}
     for user_entry in storage.data.items():
         user = _parse_user(user_entry)
-        users[user['tg_id']] = user
+        if user:
+            users[user['tg_id']] = user
 
     return users
 
