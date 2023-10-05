@@ -6,6 +6,9 @@ available giveaways.
 '''
 import asyncio
 import logging
+import os
+
+from dotenv import load_dotenv
 
 from autosg import config, sgbot, tgbot
 
@@ -14,9 +17,12 @@ async def main():
     '''Kicks off coroutines for interactions with Telegram bot server and
     SteamGifts site.
     '''
+    load_dotenv()
+    log_level = os.getenv('LOG_LEVEL', default='WARNING')
+
     logging.basicConfig(
         format="[%(asctime)s] %(levelname)s | %(module)s: %(message)s",
-        level=logging.WARNING,
+        level=log_level,
         datefmt="%Y-%m-%d %H:%M:%S")
 
     storage, dispatcher = tgbot.init_tg()

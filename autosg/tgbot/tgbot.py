@@ -7,8 +7,9 @@ from typing import TYPE_CHECKING
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.files import JSONStorage
 from aiogram.types import BotCommand
-from autosg import config
 from dotenv import load_dotenv
+
+from autosg import config
 
 from . import handlers
 
