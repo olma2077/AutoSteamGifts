@@ -102,7 +102,8 @@ class SGUser:
     async def enter_giveaways(self):
         '''Enter giveaways for a user'''
         if not await sg.verify_token(self.token):
-            logging.info(f"{self.tg_id}: sg token is invalid, needs to be updated")
+            logging.warning(f"{self.tg_id}: sg token is invalid, getting update from user")
+            await notifications.notify_expired_token(self.tg_id)
             return
 
         self.points = await self.sg_session.get_points()

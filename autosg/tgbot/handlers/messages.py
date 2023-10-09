@@ -82,25 +82,22 @@ async def handle_unregister(message: Message, state: FSMContext):
         await message.answer('You should /register first.')
 
 
-async def handle_token(message: Message):
-    # async def handle_token(message: Message, state: FSMContext):
+# async def handle_token(message: Message):
+async def handle_token(message: Message, state: FSMContext):
     '''Handle any text message from a user as a SteamGifts token'''
-    # if 'token' in await state.get_data():
-    #     await message.answer(
-    #         "You've already registered your token.\n"
-    #         "To update PHPSESSID, /unregister first.")
-    # elif await sgbot.verify_token(message.text):
-    #     await state.update_data(
-    #         token=message.text,
-    #         sections=list(sgbot.SECTION_URLS)[0:1])
-    #     await message.answer(
-    #         'Your PHPSESSID was successfully registered.\n'
-    #         'Bot will start entering giveaways for you. /configure to change default settings.')
-    #     logging.warning(f"{message.from_user.id}: new user registered!")
-    # else:
-    #     await message.answer(
-    #         'Provided PHPSESSID is invalid.\n'
-    #         'Please, verify it and provide it again below.')
-    await message.answer(
-        'Unknown command.\n'
-        'Please, try again.')
+    if 'token' in await state.get_data():
+        if await sgbot.verify_token(message.text):
+            await state.update_data(
+                token=message.text,
+                sections=list(sgbot.SECTION_URLS)[0:1])
+            await message.answer(
+                'Your PHPSESSID was successfully updated.')
+            logging.warning(f"{message.from_user.id}: token successfully updated.")
+        else:
+            await message.answer(
+                'Provided PHPSESSID is invalid.\n'
+                'Please, verify it and provide it again below.')
+    else:
+        await message.answer(
+            'Unknown command.\n'
+            'Please, try again.')
