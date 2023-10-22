@@ -49,7 +49,10 @@ def compute_prior(games: Dict) -> Dict:
     list_num_votes = [compute_game_num_votes(game) for game in games.values()]
 
     prior = {}
-    prior['raw_score'] = sum(list_increment_values) / sum(list_num_votes)
+    try:
+        prior['raw_score'] = sum(list_increment_values) / sum(list_num_votes)
+    except ZeroDivisionError:
+        print(list_increment_values, list_num_votes)
     prior['num_votes'] = sum(list_num_votes) / len(list_num_votes)
 
     return prior
