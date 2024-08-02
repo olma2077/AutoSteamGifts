@@ -3,5 +3,5 @@ beautifulsoup4==4.12.3
 emoji==2.12.1
 flake8==7.1.0
 python-dotenv==1.0.1
-tenacity==8.3.0
+tenacity==9.0.0
 steamspypi==1.1.1
