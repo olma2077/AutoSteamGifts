@@ -1,0 +1,16 @@
+[Unit]
+Description=Auto SteamGifts Service
+After=network.target
+
+[Service]
+User=olma
+WorkingDirectory=/home/olma/dev/AutoSteamGifts
+ExecStart=/bin/bash -c 'source venv/bin/activate && python3 -m autosg'
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
