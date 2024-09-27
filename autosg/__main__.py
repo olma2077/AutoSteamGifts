@@ -27,14 +27,14 @@ async def main():
 
     storage, dispatcher = tgbot.init_tg()
     await tgbot.on_startup(dispatcher)
+
     try:
         await asyncio.gather(
-            dispatcher.start_polling(),
+            dispatcher.start_polling(config.bot),
             sgbot.start_gw_entering(storage))
     finally:
         logging.warning('Exiting...')
-        await config.bot.close()
-        await tgbot.on_shutdown(dispatcher)
+        await dispatcher.stop_polling()
 
 
 if __name__ == '__main__':
