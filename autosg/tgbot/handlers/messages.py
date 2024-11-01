@@ -4,26 +4,33 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+from aiogram import Router
+from aiogram.filters import Command, CommandStart
+
 from autosg import sgbot
 
 from .markups import sections_kb
 
 if TYPE_CHECKING:
     from aiogram import Dispatcher
-    from aiogram.dispatcher import FSMContext
+    from aiogram.fsm.context import FSMContext
     from aiogram.types import Message
 
 
-def register_commands(dispatcher: Dispatcher):
-    '''Register message handlers in dispatcher'''
-    dispatcher.register_message_handler(handle_start, commands=['start'])
-    dispatcher.register_message_handler(handle_status, commands=['status'])
-    # dispatcher.register_message_handler(handle_register, commands=['register'])
-    dispatcher.register_message_handler(handle_configure, commands=['configure'])
-    dispatcher.register_message_handler(handle_unregister, commands=['unregister'])
-    dispatcher.register_message_handler(handle_token)
+message_router = Router()
 
 
+# def register_commands(dispatcher: Dispatcher):
+#     '''Register message handlers in dispatcher'''
+#     dispatcher.register_message_handler(handle_start, commands=['start'])
+#     dispatcher.register_message_handler(handle_status, commands=['status'])
+#     # dispatcher.register_message_handler(handle_register, commands=['register'])
+#     dispatcher.register_message_handler(handle_configure, commands=['configure'])
+#     dispatcher.register_message_handler(handle_unregister, commands=['unregister'])
+#     dispatcher.register_message_handler(handle_token)
+
+
+@message_router.message(CommandStart())
 async def handle_start(message: Message, state: FSMContext):
     '''Handle /start command from a user'''
     if 'token' in await state.get_data():
@@ -37,9 +44,10 @@ async def handle_start(message: Message, state: FSMContext):
             'Start with /register to give bot access to your SG account.')
 
 
+@message_router.message(Command(commands='status'))
 async def handle_status(message: Message, state: FSMContext):
     '''Handle /status command from a user'''
-    if 'token' in await state.get_data():
+    if 'token' in await state.get_data() and message.from_user:
         await message.answer(await sgbot.user_status(message.from_user.id))
     else:
         await message.answer(
@@ -60,6 +68,7 @@ async def handle_status(message: Message, state: FSMContext):
 #             'Please, provide its content below.')
 
 
+@message_router.message(Command(commands='configure'))
 async def handle_configure(message: Message, state: FSMContext):
     '''Handle /configure command from a user'''
     if 'token' in await state.get_data():
@@ -70,10 +79,11 @@ async def handle_configure(message: Message, state: FSMContext):
         await message.answer('You should /register first.')
 
 
+@message_router.message(Command(commands='unregister'))
 async def handle_unregister(message: Message, state: FSMContext):
     '''Handle /unregister command from a user'''
-    if 'token' in await state.get_data():
-        await state.finish()
+    if 'token' in await state.get_data() and message.from_user:
+        await state.clear()
         await message.answer(
             'Your settings and PHPSESSID were removed.\n'
             'Bot will stop entering giveaways for you. /register to start the bot again.')
@@ -82,10 +92,10 @@ async def handle_unregister(message: Message, state: FSMContext):
         await message.answer('You should /register first.')
 
 
-# async def handle_token(message: Message):
+@message_router.message()
 async def handle_token(message: Message, state: FSMContext):
     '''Handle any text message from a user as a SteamGifts token'''
-    if 'token' in await state.get_data():
+    if 'token' in await state.get_data() and message.text and message.from_user:
         if await sgbot.verify_token(message.text):
             await state.update_data(
                 token=message.text,

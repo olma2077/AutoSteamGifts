@@ -4,23 +4,21 @@ from __future__ import annotations
 from contextlib import suppress
 from typing import TYPE_CHECKING
 
-from aiogram.utils.exceptions import MessageNotModified
+from aiogram import Router
+from aiogram.exceptions import TelegramBadRequest
 
 from .markups import sections_kb
 
 if TYPE_CHECKING:
     from aiogram import Dispatcher
-    from aiogram.dispatcher import FSMContext
-    from aiogram.types import CallbackQuery
+    from aiogram.fsm.context import FSMContext
+    from aiogram.types import CallbackQuery, Message
 
 
-def register_callbacks(dispatcher: Dispatcher):
-    '''Register callback handlers in dispatcher'''
-    dispatcher.register_callback_query_handler(
-        update_sections_info,
-        lambda c: c.data[:3] in ['del', 'add'])
+callback_router = Router()
 
 
+@callback_router.callback_query(lambda c: c.data[:3] in ['del', 'add'])
 async def update_sections_info(callback_query: CallbackQuery, state: FSMContext):
     '''Handle section state update button'''
     section = callback_query.data.split("_")[-1]
@@ -32,7 +30,7 @@ async def update_sections_info(callback_query: CallbackQuery, state: FSMContext)
         sections.remove(section)
     await state.update_data(sections=sections)
 
-    with suppress(MessageNotModified):
+    with suppress(TelegramBadRequest):
         await callback_query.message.edit_reply_markup(
             reply_markup=await sections_kb(state))
 
