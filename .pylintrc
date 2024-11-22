@@ -1,5 +1,5 @@
 [MASTER]
-init-hook='import sys; sys.path.append("env/lib/python3.9/site-packages")'
+init-hook='import sys; sys.path.append("env/lib/python3.13/site-packages")'
 min-public-methods=1
 
 [MESSAGES CONTROL]
