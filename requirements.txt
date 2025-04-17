@@ -1,5 +1,5 @@
 aiogram==3.20.0.post0
-beautifulsoup4==4.13.3
+beautifulsoup4==4.13.4
 emoji==2.14.1
 flake8==7.1.2
 python-dotenv==1.0.1
