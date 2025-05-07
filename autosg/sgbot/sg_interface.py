@@ -39,7 +39,7 @@ async def verify_token(token: str, session: Optional[ClientSession] = None) -> b
     return await _verify_token(token, session)
 
 
-@retry(stop=stop_after_attempt(10), wait=wait_fixed(5) + wait_random(0, 5))
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(10, 30))
 async def _verify_token(token: str, session: ClientSession) -> bool:
     '''Helper to verify user-provided SteamGifts token using existing session'''
     cookies = {'PHPSESSID': token}
@@ -109,14 +109,14 @@ class SteamGiftsSession:
         self._xsrf_token = None
         self._points = None
 
-    @retry(stop=stop_after_attempt(10), wait=wait_fixed(3) + wait_random(0, 2))
+    @retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(5, 20))
     async def _get_soup_from_page(self, url: str) -> BeautifulSoup:
         '''Fetch BS object from an URL'''
         async with self.session.get(url, cookies=self._cookies) as response:
             soup = BeautifulSoup(await response.text(), 'html.parser')
         return soup
 
-    @retry(stop=stop_after_attempt(10), wait=wait_fixed(5) + wait_random(0, 5))
+    @retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(5, 30))
     async def _update_session(self) -> None:
         '''Get current user's parameters on SteamGifts
 
@@ -163,7 +163,7 @@ class SteamGiftsSession:
             try:
                 json_data = json.loads(await entry.text())
                 if json_data['type'] == 'success':
-                    await asyncio.sleep(2)
+                    await asyncio.sleep(10)
                     return True
 
                 if json_data['msg'] != 'Previously Won':
