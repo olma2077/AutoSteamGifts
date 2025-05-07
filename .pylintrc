@@ -1,6 +1,7 @@
 [MASTER]
 init-hook='import sys; sys.path.append("env/lib/python3.13/site-packages")'
 min-public-methods=1
+max-line-length=120
 
 [MESSAGES CONTROL]
 disable=W1203, C0411, C0412

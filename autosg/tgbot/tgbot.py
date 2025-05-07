@@ -31,11 +31,11 @@ def init_tg() -> Tuple[JSONStorage, Dispatcher]:
     return storage, dispatcher
 
 
-async def on_startup(dispatcher: Dispatcher):
+async def on_startup(dispatcher: Dispatcher) -> None:
     '''Actions required on Telegram bot startup'''
     dispatcher.include_routers(handlers.message_router, handlers.callback_router)
 
 
-async def on_shutdown(dispatcher: Dispatcher):
+async def on_shutdown(dispatcher: Dispatcher) -> None:
     '''Actions required on Telegram bot shutdown'''
     await dispatcher.storage.close()

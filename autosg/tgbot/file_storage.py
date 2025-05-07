@@ -7,7 +7,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 
 class _FileStorage(MemoryStorage):
-    def __init__(self, path: typing.Union[pathlib.Path, str]):
+    def __init__(self, path: typing.Union[pathlib.Path, str]) -> None:
         '''
         :param path: file path
         '''
@@ -19,16 +19,16 @@ class _FileStorage(MemoryStorage):
         except FileNotFoundError:
             pass
 
-    async def close(self):
+    async def close(self) -> None:
         if self.data:
             self.write(self.path)
         await super().close()
 
-    def read(self, path: pathlib.Path):
+    def read(self, path: pathlib.Path) -> typing.NoReturn:
         '''Read from a file storage'''
         raise NotImplementedError
 
-    def write(self, path: pathlib.Path):
+    def write(self, path: pathlib.Path) -> typing.NoReturn:
         '''Write to a file storage'''
         raise NotImplementedError
 

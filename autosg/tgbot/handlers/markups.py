@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
 
 
-async def sections_kb(state: FSMContext):
+async def sections_kb(state: FSMContext) -> InlineKeyboardMarkup:
     '''Create KB with sections and current selection state'''
     buttons = []
     selected_sections = (await state.get_data())['sections']

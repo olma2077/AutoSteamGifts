@@ -80,7 +80,6 @@ def get_steamspy_data(game_id: str) -> Dict:
     data_request['request'] = 'appdetails'
     data_request['appid'] = game_id
 
-
     try:
         data = steamspypi.download(data_request)
     except JSONDecodeError:

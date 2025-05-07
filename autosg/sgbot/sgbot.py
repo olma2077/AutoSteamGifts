@@ -37,7 +37,7 @@ class SGUser:
     '''Handles user-related operations with steamgift giveaways'''
     users = {}
 
-    def __init__(self, tg_id: str, token: str, sections: List):
+    def __init__(self, tg_id: str, token: str, sections: List) -> None:
         '''Set necessary properties, start steamgifts session'''
         self.tg_id = tg_id
         self.token = token
@@ -45,11 +45,11 @@ class SGUser:
         self.sg_session = sg.SteamGiftsSession(tg_id, token)
         self.points = 0
 
-    async def get_points(self):
+    async def get_points(self) -> int:
         '''Return current amount of points for a user'''
         return await self.sg_session.get_points()
 
-    async def _enter_giveaways_section(self, section: str, min_points: int = MIN_POINTS_TO_ENTER):
+    async def _enter_giveaways_section(self, section: str, min_points: int = MIN_POINTS_TO_ENTER) -> None:
         '''Enter giveaways for a given section'''
         if self.points < min_points:
             logging.info(f"{self.tg_id}: out of points!")
@@ -71,7 +71,7 @@ class SGUser:
                 logging.info(f"{self.tg_id}: out of points!")
                 return
 
-    async def _burn_points(self):
+    async def _burn_points(self) -> None:
         '''Burn points for a user in case there are too many unused points left'''
         giveaways = []
         i = 0
@@ -99,7 +99,7 @@ class SGUser:
                 logging.info(f"{self.tg_id}: burned enough points.")
                 return
 
-    async def enter_giveaways(self):
+    async def enter_giveaways(self) -> None:
         '''Enter giveaways for a user'''
         if not await sg.verify_token(self.token):
             logging.warning(f"{self.tg_id}: sg token is invalid, getting update from user")
@@ -123,7 +123,7 @@ class SGUser:
             await self._burn_points()
 
 
-async def user_status(idx: int):
+async def user_status(idx: int) -> str:
     '''Returns status string for a given user'''
     return f'You have {await SGUser.users[str(idx)].get_points()} points unused.'
 
@@ -201,7 +201,7 @@ async def _sync_users(storage: JSONStorage, users: Dict) -> Dict:
     return users
 
 
-async def start_gw_entering(storage: JSONStorage):
+async def start_gw_entering(storage: JSONStorage) -> None:
     '''Cycle through registered users and enter giveaways for them'''
     try:
         while True:

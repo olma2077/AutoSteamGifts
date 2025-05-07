@@ -69,7 +69,7 @@ async def handle_status(message: Message, state: FSMContext):
 
 
 @message_router.message(Command(commands='configure'))
-async def handle_configure(message: Message, state: FSMContext):
+async def handle_configure(message: Message, state: FSMContext) -> None:
     '''Handle /configure command from a user'''
     if 'token' in await state.get_data():
         await message.answer(
@@ -80,7 +80,7 @@ async def handle_configure(message: Message, state: FSMContext):
 
 
 @message_router.message(Command(commands='unregister'))
-async def handle_unregister(message: Message, state: FSMContext):
+async def handle_unregister(message: Message, state: FSMContext) -> None:
     '''Handle /unregister command from a user'''
     if 'token' in await state.get_data() and message.from_user:
         await state.clear()
@@ -93,7 +93,7 @@ async def handle_unregister(message: Message, state: FSMContext):
 
 
 @message_router.message()
-async def handle_token(message: Message, state: FSMContext):
+async def handle_token(message: Message, state: FSMContext) -> None:
     '''Handle any text message from a user as a SteamGifts token'''
     if 'token' in await state.get_data() and message.text and message.from_user:
         if await sgbot.verify_token(message.text):

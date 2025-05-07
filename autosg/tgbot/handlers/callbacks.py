@@ -19,7 +19,7 @@ callback_router = Router()
 
 
 @callback_router.callback_query(lambda c: c.data[:3] in ['del', 'add'])
-async def update_sections_info(callback_query: CallbackQuery, state: FSMContext):
+async def update_sections_info(callback_query: CallbackQuery, state: FSMContext) -> None:
     '''Handle section state update button'''
     section = callback_query.data.split("_")[-1]
     sections = (await state.get_data())['sections']

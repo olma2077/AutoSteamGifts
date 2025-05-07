@@ -15,7 +15,6 @@ from tenacity.wait import wait_fixed, wait_random
 
 if TYPE_CHECKING:
     from typing import AsyncGenerator, Generator, Optional
-
     from aiohttp import ClientSession
 
 
@@ -102,7 +101,7 @@ class Giveaway:
 
 class SteamGiftsSession:
     '''SteamGifts interface to get info for a user identified by a token'''
-    def __init__(self, tg_id: str, token: str):
+    def __init__(self, tg_id: str, token: str) -> None:
         '''Set necessary session properties'''
         self.tg_id = tg_id
         self._cookies = {'PHPSESSID': token}
@@ -118,7 +117,7 @@ class SteamGiftsSession:
         return soup
 
     @retry(stop=stop_after_attempt(10), wait=wait_fixed(5) + wait_random(0, 5))
-    async def _update_session(self):
+    async def _update_session(self) -> None:
         '''Get current user's parameters on SteamGifts
 
         Gets points and xsrf_token for interaction.

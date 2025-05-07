@@ -5,6 +5,7 @@ It is possible to select which SteamGifts sections to check for
 available giveaways.
 '''
 import asyncio
+from asyncio import TaskGroup
 import logging
 import os
 
@@ -13,7 +14,7 @@ from dotenv import load_dotenv
 from autosg import config, sgbot, tgbot
 
 
-async def main():
+async def main() -> None:
     '''Kicks off coroutines for interactions with Telegram bot server and
     SteamGifts site.
     '''
@@ -29,9 +30,9 @@ async def main():
     await tgbot.on_startup(dispatcher)
 
     try:
-        async with asyncio.TaskGroup() as tg:
-            tg.create_task(dispatcher.start_polling(config.bot, handle_signals=False))
-            tg.create_task(sgbot.start_gw_entering(storage))
+        async with TaskGroup() as tgroup:
+            tgroup.create_task(dispatcher.start_polling(config.bot, handle_signals=False))
+            tgroup.create_task(sgbot.start_gw_entering(storage))
     finally:
         logging.warning('Exiting...')
         await storage.close()
