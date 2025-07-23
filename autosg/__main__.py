@@ -35,7 +35,6 @@ async def main() -> None:
             tgroup.create_task(sgbot.start_gw_entering(storage))
     finally:
         logging.warning('Exiting...')
-        await storage.close()
 
 
 if __name__ == '__main__':

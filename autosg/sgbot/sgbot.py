@@ -146,7 +146,7 @@ def _parse_user(user: Dict) -> Optional[Dict]:
 async def _get_users_from_storage(storage: JSONStorage) -> Dict:
     '''Parse users from Telegram storage'''
     users = {}
-    for user_entry in storage.data.items():
+    for user_entry in storage.storage.items():
         user = _parse_user(user_entry)
         if user:
             users[user['tg_id']] = user
@@ -178,7 +178,7 @@ def _update_users(storage_users: Dict, users: Dict) -> Dict:
     return users
 
 
-def _add_users(storage_users: Dict, users: Dict) -> Dict:
+async def _add_users(storage_users: Dict, users: Dict) -> Dict:
     '''Add new users from Telegram bot'''
     if len(users) != len(storage_users):
         for user_id, user in storage_users.items():
@@ -186,6 +186,7 @@ def _add_users(storage_users: Dict, users: Dict) -> Dict:
                                     user['token'],
                                     user['sections'])
             logging.warning(f"{user_id}: added user to poll")
+            await notifications.notify_on_start(user_id)
 
     return users
 
@@ -196,7 +197,7 @@ async def _sync_users(storage: JSONStorage, users: Dict) -> Dict:
 
     users = await _cleanup_users(storage_users, users)
     users = _update_users(storage_users, users)
-    users = _add_users(storage_users, users)
+    users = await _add_users(storage_users, users)
 
     return users
 

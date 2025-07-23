@@ -2,11 +2,13 @@
 import pathlib
 import typing
 import json
+import logging
+import copy
 
-from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.fsm.storage.base import BaseStorage
 
 
-class _FileStorage(MemoryStorage):
+class FileStorage(BaseStorage):
     def __init__(self, path: typing.Union[pathlib.Path, str]) -> None:
         '''
         :param path: file path
@@ -15,12 +17,13 @@ class _FileStorage(MemoryStorage):
         path = self.path = pathlib.Path(path)
 
         try:
-            self.data = self.read(path)
+            self.storage = self.read(path)
         except FileNotFoundError:
-            pass
+            self.storage = {}
 
     async def close(self) -> None:
-        if self.data:
+        logging.debug('Closing storage')
+        if self.storage:
             self.write(self.path)
         await super().close()
 
@@ -33,15 +36,40 @@ class _FileStorage(MemoryStorage):
         raise NotImplementedError
 
 
-class JSONStorage(_FileStorage):
+class JSONStorage(FileStorage):
     '''
     JSON File storage based on MemoryStorage
     '''
+    async def set_state(self, key, state):
+        pass
+
+    async def get_state(self, key):
+        pass
+
+    async def set_data(self, key, data):
+        chat = str(key.chat_id)
+        user = str(key.user_id)
+
+        self.storage[chat][user]['data'] = copy.deepcopy(data)
+
+    async def get_data(self, key):
+        chat = str(key.chat_id)
+        user = str(key.user_id)
+
+        return copy.deepcopy(self.storage[chat][user]['data'])
+
+    async def update_data(self, key, data):
+        chat = str(key.chat_id)
+        user = str(key.user_id)
+
+        self.storage[chat][user]['data'].update(data)
 
     def read(self, path: pathlib.Path):
+        logging.debug(f'Loading state from {path}')
         with path.open('r') as file:
             return json.load(file)
 
     def write(self, path: pathlib.Path):
+        logging.debug(f'Saving state to {path}')
         with path.open('w') as file:
-            return json.dump(self.data, file, indent=4)
+            return json.dump(self.storage, file, indent=4)
