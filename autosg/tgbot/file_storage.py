@@ -8,7 +8,7 @@ import copy
 from aiogram.fsm.storage.base import BaseStorage
 
 
-class FileStorage(BaseStorage):
+class _FileStorage(BaseStorage):
     def __init__(self, path: typing.Union[pathlib.Path, str]) -> None:
         '''
         :param path: file path
@@ -36,7 +36,7 @@ class FileStorage(BaseStorage):
         raise NotImplementedError
 
 
-class JSONStorage(FileStorage):
+class JSONStorage(_FileStorage):
     '''
     JSON File storage based on MemoryStorage
     '''

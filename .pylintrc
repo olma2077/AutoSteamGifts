@@ -4,4 +4,4 @@ min-public-methods=1
 max-line-length=120
 
 [MESSAGES CONTROL]
-disable=W1203, C0411, C0412
+disable=W0222, W1203, C0411, C0412
