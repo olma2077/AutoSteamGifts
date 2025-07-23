@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -28,6 +29,8 @@ SECTION_URLS = {
     'Group': "search?page=%d&type=group",
     'New': "search?page=%d&type=new",
     'All': "search?page=%d"}
+SG_THROTTLE = 10
+SG_ENTRY_DELAY = 20
 
 
 async def verify_token(token: str, session: Optional[ClientSession] = None) -> bool:
@@ -66,12 +69,14 @@ def _get_giveaway_from_soup(soup: BeautifulSoup) -> Giveaway:
             'a',
             class_='giveaway__heading__name')['href'].split('/')[2]
 
+        giveaway.steam_id = soup.find(
+            'a',
+            target='_blank')['href'].split('/')[-1].split('?')[0]
+
         try:
-            giveaway.steam_id = soup.find(
-                'a',
-                target='_blank')['href'].split('/')[-2]
-        except TypeError:
-            logging.debug(f"Giveaway {giveaway.name} ({giveaway.code}) doesn't have steam_id")
+            int(giveaway.steam_id)
+        except ValueError:
+            logging.warning(f"Giveaway {giveaway.name} ({giveaway.code}) has incorrect steam_id: {giveaway.steam_id}")
 
         logging.debug(f"{giveaway}")
         return giveaway
@@ -108,10 +113,16 @@ class SteamGiftsSession:
         self.session = aiohttp.ClientSession()
         self._xsrf_token = None
         self._points = None
+        self.next_call = 0
 
     @retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(5, 20))
     async def _get_soup_from_page(self, url: str) -> BeautifulSoup:
         '''Fetch BS object from an URL'''
+        # trottling page fetching
+        sleep_time = self.next_call + SG_THROTTLE - time.time()
+        self.next_call = max(self.next_call + SG_THROTTLE, time.time())
+        await asyncio.sleep(sleep_time)
+
         async with self.session.get(url, cookies=self._cookies) as response:
             soup = BeautifulSoup(await response.text(), 'html.parser')
         return soup
@@ -163,7 +174,7 @@ class SteamGiftsSession:
             try:
                 json_data = json.loads(await entry.text())
                 if json_data['type'] == 'success':
-                    await asyncio.sleep(10)
+                    await asyncio.sleep(SG_ENTRY_DELAY)
                     return True
 
                 if json_data['msg'] != 'Previously Won':
