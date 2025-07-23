@@ -18,12 +18,12 @@ async def sections_kb(state: FSMContext) -> InlineKeyboardMarkup:
 
     for section in list(sgbot.SECTION_URLS):
         if section in selected_sections:
-            buttons.append(InlineKeyboardButton(
+            buttons.append([InlineKeyboardButton(
                 text=f"{emojize(':check_mark_button:')} {section}",
-                callback_data=f'del_section_{section}'))
+                callback_data=f'del_section_{section}')])
         else:
-            buttons.append(InlineKeyboardButton(
+            buttons.append([InlineKeyboardButton(
                 text=section,
-                callback_data=f'add_section_{section}'))
+                callback_data=f'add_section_{section}')])
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
