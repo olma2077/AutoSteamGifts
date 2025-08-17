@@ -13,7 +13,6 @@ from autosg import sgbot
 from .markups import sections_kb
 
 if TYPE_CHECKING:
-    from aiogram import Dispatcher
     from aiogram.fsm.context import FSMContext
     from aiogram.types import Message
 
