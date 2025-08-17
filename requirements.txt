@@ -2,7 +2,7 @@
 #    uv pip compile pyproject.toml -o requirements.txt
 aiofiles==24.1.0
     # via aiogram
-aiogram==3.20.0.post0
+aiogram==3.22.0
     # via auto-steam-gifts (pyproject.toml)
 aiohappyeyeballs==2.6.1
     # via aiohttp
@@ -24,8 +24,6 @@ charset-normalizer==3.4.3
     # via requests
 emoji==2.14.1
     # via auto-steam-gifts (pyproject.toml)
-flake8==7.3.0
-    # via auto-steam-gifts (pyproject.toml)
 frozenlist==1.7.0
     # via
     #   aiohttp
@@ -36,8 +34,6 @@ idna==3.10
     #   yarl
 magic-filter==1.0.12
     # via aiogram
-mccabe==0.7.0
-    # via flake8
 multidict==6.6.4
     # via
     #   aiohttp
@@ -46,14 +42,10 @@ propcache==0.3.2
     # via
     #   aiohttp
     #   yarl
-pycodestyle==2.14.0
-    # via flake8
 pydantic==2.11.7
     # via aiogram
 pydantic-core==2.33.2
     # via pydantic
-pyflakes==3.4.0
-    # via flake8
 python-dotenv==1.1.1
     # via auto-steam-gifts (pyproject.toml)
 requests==2.32.4
