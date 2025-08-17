@@ -1,4 +1,5 @@
-'''Defines keyboards' markups'''
+"""Defines keyboards' markups"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -12,18 +13,27 @@ if TYPE_CHECKING:
 
 
 async def sections_kb(state: FSMContext) -> InlineKeyboardMarkup:
-    '''Create KB with sections and current selection state'''
+    """Create KB with sections and current selection state"""
     buttons = []
-    selected_sections = (await state.get_data())['sections']
+    selected_sections = (await state.get_data())["sections"]
 
     for section in list(sgbot.SECTION_URLS):
         if section in selected_sections:
-            buttons.append([InlineKeyboardButton(
-                text=f"{emojize(':check_mark_button:')} {section}",
-                callback_data=f'del_section_{section}')])
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        text=f"{emojize(':check_mark_button:')} {section}",
+                        callback_data=f"del_section_{section}",
+                    )
+                ]
+            )
         else:
-            buttons.append([InlineKeyboardButton(
-                text=section,
-                callback_data=f'add_section_{section}')])
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        text=section, callback_data=f"add_section_{section}"
+                    )
+                ]
+            )
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)

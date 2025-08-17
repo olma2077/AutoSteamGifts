@@ -1,20 +1,13 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-
-# pyenv
-.python-version
+*_cache/
 
 # Environments
 .env
 .venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
 
 # IDE
 .vscode/
 
-# Artifacts
+# Project artifacts
 users.json
