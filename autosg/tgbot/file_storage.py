@@ -6,8 +6,12 @@ import json
 import logging
 import copy
 
+from typing import TYPE_CHECKING
+
 from aiogram.fsm.storage.base import BaseStorage
 
+if TYPE_CHECKING:
+    from typing import Dict, NoReturn
 
 class _FileStorage(BaseStorage):
     def __init__(self, path: typing.Union[pathlib.Path, str]) -> None:
@@ -28,11 +32,11 @@ class _FileStorage(BaseStorage):
             self.write(self.path)
         await super().close()
 
-    def read(self, path: pathlib.Path) -> typing.NoReturn:
+    def read(self, path: pathlib.Path) -> NoReturn:
         """Read from a file storage"""
         raise NotImplementedError
 
-    def write(self, path: pathlib.Path) -> typing.NoReturn:
+    def write(self, path: pathlib.Path) -> NoReturn:
         """Write to a file storage"""
         raise NotImplementedError
 
@@ -42,10 +46,10 @@ class JSONStorage(_FileStorage):
     JSON File storage based on MemoryStorage
     """
 
-    async def set_state(self, key, state):
+    async def set_state(self, key, state) -> None:
         pass
 
-    async def get_state(self, key):
+    async def get_state(self, key) -> None:
         pass
 
     async def set_data(self, key, data):
@@ -66,7 +70,7 @@ class JSONStorage(_FileStorage):
 
         self.storage[chat][user]["data"].update(data)
 
-    def read(self, path: pathlib.Path):
+    def read(self, path: pathlib.Path) -> Dict[str, Dict]:
         logging.debug(f"Loading state from {path}")
         with path.open("r") as file:
             return json.load(file)

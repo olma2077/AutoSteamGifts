@@ -33,8 +33,13 @@ message_router = Router()
 @message_router.message(CommandStart())
 async def handle_start(message: Message, state: FSMContext):
     """Handle /start command from a user"""
-    logging.debug(f"{message.from_user.id}: received /start command")
+    if message.from_user:
+        logging.debug(f"{message.from_user.id}: received /start command")
+    else:
+        logging.warning("Received /start command from an unknown user")
+
     logging.debug(f"State: {await state.get_data()}")
+
     if "token" in await state.get_data():
         await message.answer("Welcome back!\nYour SteamGifts are being taken care of!")
     else:
@@ -48,8 +53,13 @@ async def handle_start(message: Message, state: FSMContext):
 @message_router.message(Command(commands="status"))
 async def handle_status(message: Message, state: FSMContext):
     """Handle /status command from a user"""
-    logging.debug(f"{message.from_user.id}: received /status command")
+    if message.from_user:
+        logging.debug(f"{message.from_user.id}: received /status command")
+    else:
+        logging.warning("Received /status command from an unknown user")
+
     logging.debug(f"State: {await state.get_data()}")
+
     if "token" in await state.get_data() and message.from_user:
         await message.answer(await sgbot.user_status(message.from_user.id))
     else:
@@ -75,8 +85,13 @@ async def handle_status(message: Message, state: FSMContext):
 @message_router.message(Command(commands="configure"))
 async def handle_configure(message: Message, state: FSMContext) -> None:
     """Handle /configure command from a user"""
-    logging.debug(f"{message.from_user.id}: received /config command")
+    if message.from_user:
+        logging.debug(f"{message.from_user.id}: received /config command")
+    else:
+        logging.warning("Received /config command from an unknown user")
+
     logging.debug(f"State: {await state.get_data()}")
+
     if "token" in await state.get_data():
         await message.answer(
             "Please, select, which types of giveaways you're interested in.",
@@ -89,8 +104,13 @@ async def handle_configure(message: Message, state: FSMContext) -> None:
 @message_router.message(Command(commands="unregister"))
 async def handle_unregister(message: Message, state: FSMContext) -> None:
     """Handle /unregister command from a user"""
-    logging.debug(f"{message.from_user.id}: received /unregister command")
+    if message.from_user:
+        logging.debug(f"{message.from_user.id}: received /unregister command")
+    else:
+        logging.warning("Received /unregister command from an unknown user")
+
     logging.debug(f"State: {await state.get_data()}")
+
     if "token" in await state.get_data() and message.from_user:
         await state.clear()
         await message.answer(
@@ -105,7 +125,11 @@ async def handle_unregister(message: Message, state: FSMContext) -> None:
 @message_router.message()
 async def handle_token(message: Message, state: FSMContext) -> None:
     """Handle any text message from a user as a SteamGifts token"""
-    logging.debug(f"{message.from_user.id}: received text {message.text}")
+    if message.from_user:
+        logging.debug(f"{message.from_user.id}: received text {message.text}")
+    else:
+        logging.warning("Received text {message.text} from an unknown user")
+
     logging.debug(f"State: {await state.get_data()}")
     if "token" in await state.get_data() and message.text and message.from_user:
         if await sgbot.verify_token(message.text):

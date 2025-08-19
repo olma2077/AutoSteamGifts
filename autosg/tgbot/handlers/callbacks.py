@@ -1,7 +1,7 @@
 """Process callbacks from users' interactions with keyboards"""
 
 from __future__ import annotations
-
+import logging
 from contextlib import suppress
 from typing import TYPE_CHECKING
 
@@ -12,7 +12,7 @@ from .markups import sections_kb
 
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
-    from aiogram.types import CallbackQuery
+    from aiogram.types import CallbackQuery, Message
 
 
 callback_router = Router()
@@ -23,6 +23,14 @@ async def update_sections_info(
     callback_query: CallbackQuery, state: FSMContext
 ) -> None:
     """Handle section state update button"""
+    if not callback_query.data:
+        logging.error("Callback query data is empty! Ignoring.")
+        return
+
+    if not isinstance(callback_query.message, Message):
+        logging.error("Callback query message is not of a Message type! Ignoring.")
+        return
+
     section = callback_query.data.split("_")[-1]
     sections = (await state.get_data())["sections"]
 

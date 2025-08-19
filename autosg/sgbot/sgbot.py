@@ -19,7 +19,7 @@ from . import steam_rating as sr
 if TYPE_CHECKING:
     from typing import Dict, List, Optional
 
-    from aiogram.contrib.fsm_storage.files import JSONStorage
+    from autosg.tgbot.file_storage import JSONStorage
 
 
 SG_CYCLE = 14400
@@ -137,11 +137,11 @@ async def user_status(idx: int) -> str:
     return f"You have {await SGUser.users[str(idx)].get_points()} points unused."
 
 
-def _parse_user(user: Dict) -> Optional[Dict]:
+def _parse_user(user: Dict) -> Dict:
     """Parse user data from Telegram storage entry"""
     if "token" not in user[1][user[0]]["data"]:
         logging.debug(f"{user[0]}: no configuration present, skipping")
-        return None
+        return {}
 
     idx = user[0]
     token = user[1][user[0]]["data"]["token"]
