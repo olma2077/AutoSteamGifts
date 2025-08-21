@@ -6,8 +6,6 @@ import json
 import logging
 import copy
 
-from typing import TYPE_CHECKING
-
 from aiogram.fsm.storage.base import BaseStorage
 
 
