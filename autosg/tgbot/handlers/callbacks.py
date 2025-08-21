@@ -7,13 +7,12 @@ from typing import TYPE_CHECKING
 
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
-
+from aiogram.types import Message
 from .markups import sections_kb
 
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
-    from aiogram.types import CallbackQuery, Message
-
+    from aiogram.types import CallbackQuery
 
 callback_router = Router()
 
