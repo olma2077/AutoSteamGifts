@@ -10,9 +10,6 @@ from typing import TYPE_CHECKING
 
 from aiogram.fsm.storage.base import BaseStorage
 
-if TYPE_CHECKING:
-    from typing import Dict
-
 
 class _FileStorage(BaseStorage):
     def __init__(self, path: typing.Union[pathlib.Path, str]) -> None:
