@@ -6,7 +6,7 @@ aiogram==3.22.0
     # via auto-steam-gifts (pyproject.toml)
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.12.14
+aiohttp==3.12.15
     # via aiogram
 aiosignal==1.4.0
     # via aiohttp
