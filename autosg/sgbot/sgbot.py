@@ -17,7 +17,7 @@ from . import sg_interface as sg
 from . import steam_rating as sr
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional
+    from typing import Dict, List
 
     from autosg.tgbot.file_storage import JSONStorage
 
