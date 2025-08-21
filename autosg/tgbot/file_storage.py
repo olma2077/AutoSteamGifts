@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from aiogram.fsm.storage.base import BaseStorage
 
 if TYPE_CHECKING:
-    from typing import Dict, NoReturn
+    from typing import Dict
 
 
 class _FileStorage(BaseStorage):
@@ -33,11 +33,11 @@ class _FileStorage(BaseStorage):
             self.write(self.path)
         await super().close()
 
-    def read(self, path: pathlib.Path) -> NoReturn:
+    def read(self, path: pathlib.Path) -> typing.NoReturn:
         """Read from a file storage"""
         raise NotImplementedError
 
-    def write(self, path: pathlib.Path) -> NoReturn:
+    def write(self, path: pathlib.Path) -> typing.NoReturn:
         """Write to a file storage"""
         raise NotImplementedError
 
@@ -71,7 +71,7 @@ class JSONStorage(_FileStorage):
 
         self.storage[chat][user]["data"].update(data)
 
-    def read(self, path: pathlib.Path) -> Dict[str, Dict]:
+    def read(self, path: pathlib.Path) -> dict[str, dict]:
         logging.debug(f"Loading state from {path}")
         with path.open("r") as file:
             return json.load(file)
