@@ -44,7 +44,7 @@ propcache==0.3.2
     #   yarl
 pydantic==2.11.9
     # via aiogram
-pydantic-core==2.33.2
+pydantic-core==2.39.0
     # via pydantic
 python-dotenv==1.1.1
     # via auto-steam-gifts (pyproject.toml)
