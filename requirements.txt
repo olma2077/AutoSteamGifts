@@ -42,7 +42,7 @@ propcache==0.3.2
     # via
     #   aiohttp
     #   yarl
-pydantic==2.11.7
+pydantic==2.11.9
     # via aiogram
 pydantic-core==2.33.2
     # via pydantic
