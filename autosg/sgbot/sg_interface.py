@@ -69,16 +69,15 @@ def _get_giveaway_from_soup(soup: BeautifulSoup) -> Giveaway:
         giveaway.code = soup.find("a", class_="giveaway__heading__name")["href"].split(
             "/"
         )[2]
-
-        giveaway.steam_id = (
-            soup.find("a", target="_blank")["href"].split("/")[-1].split("?")[0]
-        )
-
         try:
+            giveaway.steam_id = (
+                soup.find("a", target="_blank")["href"].split("/")[-1].split("?")[0]
+            )
+
             int(giveaway.steam_id)
         except ValueError:
             logging.warning(
-                f"Giveaway {giveaway.name} ({giveaway.code}) has incorrect steam_id: {giveaway.steam_id}"
+                f"Couldn't parse steam_id from {soup.find("a", target="_blank")} for {giveaway.name} ({giveaway.code})"
             )
 
         logging.debug(f"{giveaway}")
