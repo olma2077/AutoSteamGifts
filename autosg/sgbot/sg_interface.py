@@ -77,7 +77,7 @@ def _get_giveaway_from_soup(soup: BeautifulSoup) -> Giveaway:
             int(giveaway.steam_id)
         except ValueError:
             logging.warning(
-                f"Couldn't parse steam_id from {soup.find("a", target="_blank")} for {giveaway.name} ({giveaway.code})"
+                f'''Couldn't parse steam_id from {soup.find("a", target="_blank")} for {giveaway.name} ({giveaway.code})'''
             )
 
         logging.debug(f"{giveaway}")
