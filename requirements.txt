@@ -2,7 +2,7 @@
 #    uv pip compile pyproject.toml --no-deps -o requirements.txt
 aiogram==3.22.0
     # via auto-steam-gifts (pyproject.toml)
-beautifulsoup4==4.13.5
+beautifulsoup4==4.14.2
     # via auto-steam-gifts (pyproject.toml)
 emoji==2.15.0
     # via auto-steam-gifts (pyproject.toml)
