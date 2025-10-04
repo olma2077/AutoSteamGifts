@@ -12,6 +12,10 @@ from time import sleep
 from json.decoder import JSONDecodeError
 from typing import TYPE_CHECKING
 
+from tenacity import retry
+from tenacity.stop import stop_after_attempt
+from tenacity.wait import wait_fixed, wait_random
+
 import steamspypi
 
 if TYPE_CHECKING:
@@ -75,6 +79,7 @@ def compute_bayesian_average_for_games(games: Dict) -> Dict:
     return games
 
 
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(10, 30))
 def get_steamspy_data(game_id: str) -> Dict:
     """Get votes info from SteamSpy for a game"""
     empty_data = {"positive": 0, "negative": 0}
@@ -87,7 +92,7 @@ def get_steamspy_data(game_id: str) -> Dict:
     data_request["appid"] = game_id
 
     try:
-        sleep(0.1)
+        sleep(0.5)
         data = steamspypi.download(data_request)
     except JSONDecodeError:
         logging.warning(f"Failed to fetch SteamSpy data for {game_id}")
