@@ -10,5 +10,5 @@ python-dotenv==1.2.1
     # via auto-steam-gifts (pyproject.toml)
 steamspypi==1.1.1
     # via auto-steam-gifts (pyproject.toml)
-tenacity==9.1.2
+tenacity==9.1.4
     # via auto-steam-gifts (pyproject.toml)
