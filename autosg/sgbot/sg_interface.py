@@ -1,4 +1,8 @@
-"""Implements interface to SteamGifts site for entering giveaways"""
+"""Implements interface to SteamGifts site for entering giveaways.
+
+Switched from :mod:`aiohttp` + :mod:`bs4` to Playwright for browser-driven
+navigation and DOM extraction.
+"""
 
 from __future__ import annotations
 
@@ -7,17 +11,13 @@ import json
 import logging
 import time
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, AsyncGenerator, Generator, Optional
 
-import aiohttp
-from bs4 import BeautifulSoup
 from tenacity import retry
 from tenacity.stop import stop_after_attempt
 from tenacity.wait import wait_fixed, wait_random
 
-if TYPE_CHECKING:
-    from typing import AsyncGenerator, Generator, Optional
-    from aiohttp import ClientSession
+from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 
 
 SG_URL = "https://www.steamgifts.com/"
@@ -35,74 +35,38 @@ SG_THROTTLE = 10
 SG_ENTRY_DELAY = 20
 
 
-async def verify_token(token: str, session: Optional[ClientSession] = None) -> bool:
-    """Verify user-provided SteamGifts token"""
-    if not session:
-        async with aiohttp.ClientSession() as session:
-            return await _verify_token(token, session)
-
-    return await _verify_token(token, session)
-
-
 @retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(10, 30))
-async def _verify_token(token: str, session: ClientSession) -> bool:
-    """Helper to verify user-provided SteamGifts token using existing session"""
-    cookies = {"PHPSESSID": token}
+async def verify_token(token: str, session: Optional[object] = None) -> bool:
+    """Verify user-provided SteamGifts token using Playwright.
 
-    async with session.get(VERIFY_URL, cookies=cookies) as resp:
-        return len(resp.history) == 0
-
-
-def _get_giveaway_from_soup(soup: BeautifulSoup) -> Giveaway:
-    """Get givwaway info from a giveaway soup"""
-    giveaway = Giveaway()
-    # Fix: handle soup None return value in a proper way
-    try:
-        giveaway.cost = int(
-            soup.find_all("span", class_="giveaway__heading__thin")[-1].text.strip(
-                "(P)"
-            )
+    The function navigates to the profile/settings page with the provided
+    ``PHPSESSID`` cookie. If the final URL equals the settings page then the
+    token is considered valid. The ``session`` parameter is ignored but kept
+    for backward compatibility.
+    """
+    async with async_playwright() as p:
+        browser: Browser = await p.chromium.launch(headless=True)
+        context: BrowserContext = await browser.new_context()
+        await context.add_cookies(
+            [
+                {
+                    "name": "PHPSESSID",
+                    "value": token,
+                    "domain": "www.steamgifts.com",
+                    "path": "/",
+                }
+            ]
         )
-
-        giveaway.name = soup.find("a", class_="giveaway__heading__name").text
-
-        giveaway.code = soup.find("a", class_="giveaway__heading__name")["href"].split(
-            "/"
-        )[2]
-        try:
-            giveaway.steam_id = (
-                soup.find("a", target="_blank")["href"].split("/")[-1].split("?")[0]
-            )
-
-            int(giveaway.steam_id)
-        except Exception:
-            logging.warning(
-                f'''Couldn't parse steam_id from {soup.find("a", target="_blank")} for {giveaway.name} ({giveaway.code})'''
-            )
-
-        logging.debug(f"{giveaway}")
-        return giveaway
-
-    except Exception:
-        logging.error(f"Failed to parse giveaway: \n {soup.prettify()}")
-        raise
-
-
-def _get_giveaways_from_soup_page(
-    soup: BeautifulSoup,
-) -> Generator[Giveaway, None, None]:
-    """Get list of giveaways from a page soup"""
-
-    for item in soup.find_all("div", class_="giveaway__row-inner-wrap"):
-        if "is-faded" in item["class"]:
-            continue
-        yield _get_giveaway_from_soup(item)
+        page: Page = await context.new_page()
+        await page.goto(VERIFY_URL)
+        valid = page.url == VERIFY_URL
+        await browser.close()
+        await p.stop()
+        return valid
 
 
 @dataclass
 class Giveaway:
-    """Giveaway parameters object"""
-
     code: str = ""
     name: str = ""
     cost: int = 0
@@ -110,91 +74,152 @@ class Giveaway:
 
 
 class SteamGiftsSession:
-    """SteamGifts interface to get info for a user identified by a token"""
+    """SteamGifts interface backed by Playwright.
+
+    This class lazily starts Playwright and a browser context. For compatibility
+    with existing code that calls ``await sg_session.session.close()``, the
+    instance exposes ``session`` referencing itself and implements ``close``.
+    """
 
     def __init__(self, tg_id: str, token: str) -> None:
-        """Set necessary session properties"""
         self.tg_id = tg_id
-        self._cookies = {"PHPSESSID": token}
-        self.session = aiohttp.ClientSession()
-        self._xsrf_token = None
-        self._points = None
+        self._token = token
+        self._playwright = None
+        self._browser: Browser | None = None
+        self._context: BrowserContext | None = None
+        self.page: Page | None = None
+        self._xsrf_token: Optional[str] = None
+        self._points: Optional[int] = None
         self.next_call = 0
+        # compatibility: callers expect an object with async close()
+        self.session = self
 
-    @retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(5, 20))
-    async def _get_soup_from_page(self, url: str) -> BeautifulSoup:
-        """Fetch BS object from an URL"""
-        # trottling page fetching
+    async def _ensure_browser(self) -> None:
+        if self._browser:
+            return
+        self._playwright = await async_playwright().start()
+        self._browser = await self._playwright.chromium.launch(headless=True)
+        self._context = await self._browser.new_context()
+        await self._context.add_cookies(
+            [
+                {
+                    "name": "PHPSESSID",
+                    "value": self._token,
+                    "domain": "www.steamgifts.com",
+                    "path": "/",
+                }
+            ]
+        )
+        self.page = await self._context.new_page()
+
+    async def close(self) -> None:
+        """Close Playwright resources."""
+        if self._browser:
+            await self._browser.close()
+            self._browser = None
+        if self._playwright:
+            await self._playwright.stop()
+            self._playwright = None
+
+    async def _throttle(self) -> None:
         sleep_time = self.next_call + SG_THROTTLE - time.time()
         self.next_call = max(self.next_call + SG_THROTTLE, time.time())
-        await asyncio.sleep(sleep_time)
+        if sleep_time > 0:
+            await asyncio.sleep(sleep_time)
 
-        async with self.session.get(url, cookies=self._cookies) as response:
-            soup = BeautifulSoup(await response.text(), "html.parser")
-        return soup
+    async def _load(self, url: str):
+        await self._ensure_browser()
+        await self._throttle()
+        assert self.page is not None
+        return await self.page.goto(url)
 
     @retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(5, 30))
     async def _update_session(self) -> None:
-        """Get current user's parameters on SteamGifts
-
-        Gets points and xsrf_token for interaction.
-        """
-        soup = await self._get_soup_from_page(SG_URL)
-        self._xsrf_token = soup.find("input", {"name": "xsrf_token"})["value"]
-        self._points = int(
-            soup.find("span", class_="nav__points").text.replace(",", "")
-        )
+        """Fetch the home page and extract xsrf token / points."""
+        await self._load(SG_URL)
+        assert self.page is not None
+        self._xsrf_token = await self.page.locator('input[name="xsrf_token"]').get_attribute("value")
+        points_text = await self.page.locator('span.nav__points').text_content()
+        # defensive: if selector missing, raise to trigger retry
+        if points_text is None:
+            raise RuntimeError("Could not read points from page")
+        self._points = int(points_text.replace(",", ""))
 
     async def get_points(self) -> int:
-        """Method to get current user's points value"""
         await self._update_session()
+        assert self._points is not None
         return self._points
 
-    async def get_giveaways_from_section(
-        self, section: str
-    ) -> AsyncGenerator[Giveaway, None]:
-        """Collect all giveaways for a given section"""
+    async def _parse_giveaway(self, element) -> Giveaway:
+        giveaway = Giveaway()
+        costs = await element.locator('span.giveaway__heading__thin').all_text_contents()
+        if costs:
+            try:
+                giveaway.cost = int(costs[-1].strip("(P)"))
+            except Exception:
+                logging.debug("Could not parse cost: %s", costs[-1])
+        name_el = await element.query_selector('a.giveaway__heading__name')
+        if name_el:
+            giveaway.name = (await name_el.text_content()) or ""
+            href = await name_el.get_attribute("href") or ""
+            parts = href.split("/")
+            if len(parts) > 2:
+                giveaway.code = parts[2]
+        try:
+            steam_link = await element.query_selector('a[target="_blank"]')
+            if steam_link:
+                href2 = await steam_link.get_attribute("href") or ""
+                giveaway.steam_id = href2.split("/")[-1].split("?")[0]
+                int(giveaway.steam_id)
+        except Exception:
+            logging.warning(f"Couldn't parse steam_id for {giveaway.name} ({giveaway.code})")
+        logging.debug(giveaway)
+        return giveaway
+
+    async def get_giveaways_from_section(self, section: str) -> AsyncGenerator[Giveaway, None]:
         await self._update_session()
 
-        page = 1
+        page_num = 1
         while True:
-            page_url = SECTION_URLS[section] % page
+            page_url = SECTION_URLS[section] % page_num
             filter_url = f"{SG_URL}/giveaways/{page_url}"
+            await self._load(filter_url)
+            assert self.page is not None
+            logging.info(f"{self.tg_id}: parsing page {page_num} of {section} section")
 
-            soup = await self._get_soup_from_page(filter_url)
-            logging.info(f"{self.tg_id}: parsing page {page} of {section} section")
-
-            if soup.find(class_="pagination--no-results"):
-                logging.info(
-                    f"{self.tg_id}: page {page} of {section} section is empty, finishing"
-                )
+            if await self.page.query_selector('.pagination--no-results'):
+                logging.info(f"{self.tg_id}: page {page_num} of {section} section is empty, finishing")
                 break
 
-            for giveaway in _get_giveaways_from_soup_page(soup):
-                yield giveaway
+            elements = await self.page.query_selector_all('div.giveaway__row-inner-wrap')
+            for el in elements:
+                cls = (await el.get_attribute("class")) or ""
+                if "is-faded" in cls.split():
+                    continue
+                yield await self._parse_giveaway(el)
 
-            page += 1
+            page_num += 1
 
     async def enter_giveaway(self, giveaway: Giveaway) -> bool:
-        """Enter a game's giveaway"""
+        await self._ensure_browser()
+        if not self._xsrf_token:
+            await self._update_session()
         payload = {
             "xsrf_token": self._xsrf_token,
             "do": "entry_insert",
             "code": giveaway.code,
         }
-
-        async with self.session.post(SG_URL + "ajax.php", data=payload) as entry:
-            try:
-                json_data = json.loads(await entry.text())
-                if json_data["type"] == "success":
-                    await asyncio.sleep(SG_ENTRY_DELAY)
-                    return True
-
-                if json_data["msg"] != "Previously Won":
-                    logging.warning(f"{self.tg_id}: entry error: {json_data['msg']}")
-
-                return False
-
-            except Exception:
-                logging.error(f"{self.tg_id}: could not parse json: \n {entry.text()}")
-                raise
+        assert self._context is not None
+        response = await self._context.request.post(SG_URL + "ajax.php", data=payload)
+        try:
+            json_data = await response.json()
+            if json_data.get("type") == "success":
+                await asyncio.sleep(SG_ENTRY_DELAY)
+                return True
+            if json_data.get("msg") != "Previously Won":
+                logging.warning(f"{self.tg_id}: entry error: {json_data.get('msg')}")
+            return False
+        except Exception:
+            text = await response.text()
+            logging.error(f"{self.tg_id}: could not parse json: \n {text}")
+            raise
