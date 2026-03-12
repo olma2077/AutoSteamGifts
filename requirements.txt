@@ -6,7 +6,7 @@ emoji==2.15.0
     # via auto-steam-gifts (pyproject.toml)
 playwright==1.58.0
     # via auto-steam-gifts (pyproject.toml)
-python-dotenv==1.2.1
+python-dotenv==1.2.2
     # via auto-steam-gifts (pyproject.toml)
 steamspypi==1.1.1
     # via auto-steam-gifts (pyproject.toml)
