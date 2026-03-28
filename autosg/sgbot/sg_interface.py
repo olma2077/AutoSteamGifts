@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import random
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -35,21 +36,34 @@ SG_THROTTLE = 10
 SG_ENTRY_DELAY = 20
 
 
+_BROWSER_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+}
+
+
 async def verify_token(token: str, session: Optional[ClientSession] = None) -> bool:
     """Verify user-provided SteamGifts token"""
     if not session:
-        async with aiohttp.ClientSession() as session:
-            return await _verify_token(token, session)
+        async with aiohttp.ClientSession(headers=_BROWSER_HEADERS) as session:
+            session.cookie_jar.update_cookies({"PHPSESSID": token})
+            return await _verify_token(session)
 
-    return await _verify_token(token, session)
+    return await _verify_token(session)
 
 
 @retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(10, 30))
-async def _verify_token(token: str, session: ClientSession) -> bool:
+async def _verify_token(session: ClientSession) -> bool:
     """Helper to verify user-provided SteamGifts token using existing session"""
-    cookies = {"PHPSESSID": token}
-
-    async with session.get(VERIFY_URL, cookies=cookies) as resp:
+    async with session.get(VERIFY_URL) as resp:
         return len(resp.history) == 0
 
 
@@ -115,8 +129,8 @@ class SteamGiftsSession:
     def __init__(self, tg_id: str, token: str) -> None:
         """Set necessary session properties"""
         self.tg_id = tg_id
-        self._cookies = {"PHPSESSID": token}
-        self.session = aiohttp.ClientSession()
+        self.session = aiohttp.ClientSession(headers=_BROWSER_HEADERS)
+        self.session.cookie_jar.update_cookies({"PHPSESSID": token})
         self._xsrf_token = None
         self._points = None
         self.next_call = 0
@@ -124,12 +138,13 @@ class SteamGiftsSession:
     @retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(5, 20))
     async def _get_soup_from_page(self, url: str) -> BeautifulSoup:
         """Fetch BS object from an URL"""
-        # trottling page fetching
-        sleep_time = self.next_call + SG_THROTTLE - time.time()
+        # throttling page fetching with jitter to avoid bot-like fixed intervals
+        jitter = random.uniform(0, 3)
+        sleep_time = self.next_call + SG_THROTTLE + jitter - time.time()
         self.next_call = max(self.next_call + SG_THROTTLE, time.time())
         await asyncio.sleep(sleep_time)
 
-        async with self.session.get(url, cookies=self._cookies) as response:
+        async with self.session.get(url) as response:
             soup = BeautifulSoup(await response.text(), "html.parser")
         return soup
 
