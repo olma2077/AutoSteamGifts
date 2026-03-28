@@ -5,6 +5,7 @@ requires-python = ">=3.13"
 dependencies = [
     "aiogram==3.22.0",
     "beautifulsoup4==4.13.4",
+    "curl-cffi>=0.7",
     "emoji==2.14.1",
     "python-dotenv==1.1.1",
     "steamspypi==1.1.1",

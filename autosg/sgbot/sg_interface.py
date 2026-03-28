@@ -5,19 +5,19 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import random
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-import aiohttp
 from bs4 import BeautifulSoup
+from curl_cffi.requests import AsyncSession
 from tenacity import retry
 from tenacity.stop import stop_after_attempt
 from tenacity.wait import wait_fixed, wait_random
 
 if TYPE_CHECKING:
     from typing import AsyncGenerator, Generator, Optional
-    from aiohttp import ClientSession
 
 
 SG_URL = "https://www.steamgifts.com/"
@@ -35,22 +35,21 @@ SG_THROTTLE = 10
 SG_ENTRY_DELAY = 20
 
 
-async def verify_token(token: str, session: Optional[ClientSession] = None) -> bool:
+async def verify_token(token: str, session: Optional[AsyncSession] = None) -> bool:
     """Verify user-provided SteamGifts token"""
     if not session:
-        async with aiohttp.ClientSession() as session:
-            return await _verify_token(token, session)
+        async with AsyncSession(impersonate="chrome124") as session:
+            session.cookies.set("PHPSESSID", token)
+            return await _verify_token(session)
 
-    return await _verify_token(token, session)
+    return await _verify_token(session)
 
 
 @retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(10, 30))
-async def _verify_token(token: str, session: ClientSession) -> bool:
+async def _verify_token(session: AsyncSession) -> bool:
     """Helper to verify user-provided SteamGifts token using existing session"""
-    cookies = {"PHPSESSID": token}
-
-    async with session.get(VERIFY_URL, cookies=cookies) as resp:
-        return len(resp.history) == 0
+    resp = await session.get(VERIFY_URL)
+    return len(resp.history) == 0
 
 
 def _get_giveaway_from_soup(soup: BeautifulSoup) -> Giveaway:
@@ -115,8 +114,8 @@ class SteamGiftsSession:
     def __init__(self, tg_id: str, token: str) -> None:
         """Set necessary session properties"""
         self.tg_id = tg_id
-        self._cookies = {"PHPSESSID": token}
-        self.session = aiohttp.ClientSession()
+        self.session = AsyncSession(impersonate="chrome124")
+        self.session.cookies.set("PHPSESSID", token)
         self._xsrf_token = None
         self._points = None
         self.next_call = 0
@@ -124,13 +123,14 @@ class SteamGiftsSession:
     @retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(5, 20))
     async def _get_soup_from_page(self, url: str) -> BeautifulSoup:
         """Fetch BS object from an URL"""
-        # trottling page fetching
-        sleep_time = self.next_call + SG_THROTTLE - time.time()
+        # throttling page fetching with jitter to avoid bot-like fixed intervals
+        jitter = random.uniform(0, 3)
+        sleep_time = self.next_call + SG_THROTTLE + jitter - time.time()
         self.next_call = max(self.next_call + SG_THROTTLE, time.time())
         await asyncio.sleep(sleep_time)
 
-        async with self.session.get(url, cookies=self._cookies) as response:
-            soup = BeautifulSoup(await response.text(), "html.parser")
+        response = await self.session.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
         return soup
 
     @retry(stop=stop_after_attempt(5), wait=wait_fixed(10) + wait_random(5, 30))
@@ -140,7 +140,11 @@ class SteamGiftsSession:
         Gets points and xsrf_token for interaction.
         """
         soup = await self._get_soup_from_page(SG_URL)
-        self._xsrf_token = soup.find("input", {"name": "xsrf_token"})["value"]
+        xsrf_input = soup.find("input", {"name": "xsrf_token"})
+        if xsrf_input is None:
+            logging.error(f"{self.tg_id}: xsrf_token not found, page dump:\n{soup.prettify()}")
+            raise ValueError("xsrf_token input not found in page")
+        self._xsrf_token = xsrf_input["value"]
         self._points = int(
             soup.find("span", class_="nav__points").text.replace(",", "")
         )
@@ -183,18 +187,18 @@ class SteamGiftsSession:
             "code": giveaway.code,
         }
 
-        async with self.session.post(SG_URL + "ajax.php", data=payload) as entry:
-            try:
-                json_data = json.loads(await entry.text())
-                if json_data["type"] == "success":
-                    await asyncio.sleep(SG_ENTRY_DELAY)
-                    return True
+        entry = await self.session.post(SG_URL + "ajax.php", data=payload)
+        try:
+            json_data = json.loads(entry.text)
+            if json_data["type"] == "success":
+                await asyncio.sleep(SG_ENTRY_DELAY)
+                return True
 
-                if json_data["msg"] != "Previously Won":
-                    logging.warning(f"{self.tg_id}: entry error: {json_data['msg']}")
+            if json_data["msg"] != "Previously Won":
+                logging.warning(f"{self.tg_id}: entry error: {json_data['msg']}")
 
-                return False
+            return False
 
-            except Exception:
-                logging.error(f"{self.tg_id}: could not parse json: \n {entry.text()}")
-                raise
+        except Exception:
+            logging.error(f"{self.tg_id}: could not parse json: \n {entry.text}")
+            raise

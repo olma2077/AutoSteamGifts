@@ -115,7 +115,11 @@ class SGUser:
             await notifications.notify_expired_token(self.tg_id)
             return
 
-        self.points = await self.sg_session.get_points()
+        try:
+            self.points = await self.sg_session.get_points()
+        except Exception:
+            logging.exception(f"{self.tg_id}: failed to update session, skipping cycle")
+            return
 
         for section in self.sections:
             logging.info(f"{self.tg_id}: polling section {section}")
@@ -217,7 +221,10 @@ async def start_gw_entering(storage: JSONStorage) -> None:
                 logging.info(
                     f"{user.tg_id}: polling user with sections: {user.sections}"
                 )
-                await user.enter_giveaways()
+                try:
+                    await user.enter_giveaways()
+                except Exception:
+                    logging.exception(f"{user.tg_id}: unhandled error, skipping user this cycle")
                 await asyncio.sleep(SG_USERS_DELAY)
 
             await asyncio.sleep(SG_CYCLE)
