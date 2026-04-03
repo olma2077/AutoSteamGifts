@@ -4,7 +4,7 @@ aiogram==3.26.0
     # via auto-steam-gifts (pyproject.toml)
 beautifulsoup4==4.14.3
     # via auto-steam-gifts (pyproject.toml)
-curl-cffi==0.14.0
+curl-cffi==0.15.0
     # via auto-steam-gifts (pyproject.toml)
 emoji==2.14.1
     # via auto-steam-gifts (pyproject.toml)
