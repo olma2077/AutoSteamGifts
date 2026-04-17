@@ -2,7 +2,7 @@
 #    uv pip compile pyproject.toml --no-deps -o requirements.txt
 aiogram==3.27.0
     # via auto-steam-gifts (pyproject.toml)
-beautifulsoup4==4.13.4
+beautifulsoup4==4.14.3
     # via auto-steam-gifts (pyproject.toml)
 curl-cffi==0.14.0
     # via auto-steam-gifts (pyproject.toml)
