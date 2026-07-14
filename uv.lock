@@ -13,7 +13,7 @@ wheels = [
 
 [[package]]
 name = "aiogram"
-version = "3.22.0"
+version = "3.29.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -23,9 +23,9 @@ dependencies = [
     { name = "pydantic" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/92/2c/fe0845a97f6126357d20163ede8f76bc161f73122123c6548ca19d9a12c7/aiogram-3.22.0.tar.gz", hash = "sha256:c483f81e37aeea8e7f592c9bd14f6acc80d9b7a2698e296a45bf47ff60a98510", size = 1520414, upload-time = "2025-08-17T16:20:45.471Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/02/fc/16efb82a4a27c3046ba79614727371bd155d4df2b8919f4ce6df31f0e9ec/aiogram-3.29.1.tar.gz", hash = "sha256:7ac92c64b71d33eb8e3656de4517a1533a88b61728e5dd00b1e11393b669b521", size = 1903827, upload-time = "2026-07-01T23:43:31.805Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ba/e5/9f9fae7b50ed502e33121dd62a7e9b076d00630eaafe1dd7fda64f7e8625/aiogram-3.22.0-py3-none-any.whl", hash = "sha256:1c6eceb078ff62cf0556a5466cf3e7e8119678c26cc56803b7ac5f73633934a8", size = 698216, upload-time = "2025-08-17T16:20:43.354Z" },
+    { url = "https://files.pythonhosted.org/packages/75/bd/27556763072b5b4df006e20afc14f4f750c06b796edbef95df7e489e6e6f/aiogram-3.29.1-py3-none-any.whl", hash = "sha256:63cd0123e8ab065f78974ad58ff57c1a5c8c35aac1055761859c4a5ad27eaf04", size = 804448, upload-time = "2026-07-01T23:43:30.19Z" },
 ]
 
 [[package]]
@@ -122,7 +122,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiogram", specifier = "==3.22.0" },
+    { name = "aiogram", specifier = "==3.29.1" },
     { name = "beautifulsoup4", specifier = "==4.15.0" },
     { name = "curl-cffi", specifier = ">=0.7" },
     { name = "emoji", specifier = "==2.15.0" },
