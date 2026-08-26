@@ -7,7 +7,7 @@ dependencies = [
     "beautifulsoup4==4.15.0",
     "curl-cffi>=0.16.0",
     "emoji==2.15.0",
-    "python-dotenv==1.2.2",
+    "python-dotenv==1.2.3",
     "steamspypi==1.1.1",
     "tenacity==9.1.4",
 ]
