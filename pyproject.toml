@@ -9,7 +9,7 @@ dependencies = [
     "emoji==2.15.0",
     "python-dotenv==1.2.3",
     "steamspypi==1.1.1",
-    "tenacity==9.1.4",
+    "tenacity==9.2.1",
 ]
 
 [project.ruff]
